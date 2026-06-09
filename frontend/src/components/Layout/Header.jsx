@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
+import logo from "../../logo.svg";
 import { productData, categoriesData } from "../../static/data";
 import {
   AiOutlineHeart,
@@ -60,10 +61,7 @@ const Header = ({ activeHeading }) => {
         <div className="hidden 800px:h-[50px] 800px:my-[20px] 800px:flex items-center justify-between ">
           <div>
             <Link to="/">
-              <img
-                src="https://shopo.quomodothemes.website/assets/images/logo.svg"
-                alt=""
-              />
+              <img src={logo} alt="Vendoz" className="h-10" />
             </Link>
           </div>
           {/*Search box  */}
@@ -73,11 +71,11 @@ const Header = ({ activeHeading }) => {
               placeholder="Search for product..."
               value={searchTerm}
               onChange={handleSearchChange}
-              className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
+              className={`${styles.input} h-[44px] pl-4 pr-12`}
             />
             <AiOutlineSearch
-              size={30}
-              className="absolute right-2 top-1.5 cursor-pointer"
+              size={22}
+              className="absolute right-4 top-3 text-gray-400 cursor-pointer"
             />
             {
               // Search data if length is not 0 then show
@@ -107,12 +105,14 @@ const Header = ({ activeHeading }) => {
           {/* Search end */}
 
           {/* Become a Seller */}
-          <div className={`${styles.button}`}>
+          <div>
             <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
-              <h1 className="text-[#fff] flex items-center">
-                {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
-                <IoIosArrowForward className="ml-1" />
-              </h1>
+              <div className={`${styles.button}`}>
+                <span className="flex items-center">
+                  {isSeller ? "Go Dashboard" : "Become Seller"}
+                  <IoIosArrowForward className="ml-2" />
+                </span>
+              </div>
             </Link>
           </div>
           {/* Become a Seller end */}
