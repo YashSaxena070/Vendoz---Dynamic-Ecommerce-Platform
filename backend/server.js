@@ -27,6 +27,13 @@ app.use(
   })
 );
 
+app.get("/healthz", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running"
+  });
+});
+
 // Redirect absolute HTTP/HTTPS image requests (e.g., Cloudinary URLs) directly
 app.use((req, res, next) => {
   let decodedUrl = "";
