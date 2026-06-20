@@ -26,7 +26,7 @@ const WithdrawMoney = () => {
 
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+  }, [dispatch, seller._id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -83,10 +83,13 @@ const WithdrawMoney = () => {
   };
 
   const withdrawHandler = async () => {
-    if (withdrawAmount < 50 || withdrawAmount > availableBalance) {
+    const amountToWithdraw = Number(withdrawAmount);
+    const balance = Number(seller?.availableBalance || 0);
+
+    if (amountToWithdraw < 50 || amountToWithdraw > balance) {
       toast.error("You can't withdraw this amount!");
     } else {
-      const amount = withdrawAmount;
+      const amount = amountToWithdraw;
       await axios
         .post(
           `${server}/withdraw/create-withdraw-request`,
@@ -95,6 +98,7 @@ const WithdrawMoney = () => {
         )
         .then((res) => {
           toast.success("Withdraw money request is successful!");
+          dispatch(loadSeller());
         });
     }
   };

@@ -6,18 +6,26 @@ import { RxPerson } from "react-icons/rx";
 import { Link, useNavigate } from "react-router-dom";
 import {
   MdOutlineAdminPanelSettings,
-  MdOutlinePassword,
   MdOutlineTrackChanges,
 } from "react-icons/md";
 import { TbAddressBook } from "react-icons/tb";
 import axios from "axios";
-import { server } from "../../server";
+import { server, backend_url } from "../../server";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
+const sidebarItems = [
+  { id: 1, label: "Profile", icon: RxPerson },
+  { id: 2, label: "Orders", icon: HiOutlineShoppingBag },
+  { id: 3, label: "Refunds", icon: HiOutlineReceiptRefund },
+  { id: 4, label: "Inbox", icon: AiOutlineMessage, navigateTo: "/inbox" },
+  { id: 5, label: "Track Order", icon: MdOutlineTrackChanges },
+  { id: 6, label: "Change Password", icon: RiLockPasswordLine },
+  { id: 7, label: "Address", icon: TbAddressBook },
+];
+
 const ProfileSidebar = ({ active, setActive }) => {
   const navigate = useNavigate();
-
   const { user } = useSelector((state) => state.user);
 
   const logoutHandler = () => {
@@ -25,6 +33,7 @@ const ProfileSidebar = ({ active, setActive }) => {
       .get(`${server}/user/logout`, { withCredentials: true })
       .then((res) => {
         toast.success(res.data.message);
+        localStorage.removeItem("vendoz_pincode");
         window.location.reload(true);
         navigate("/login");
       })
@@ -34,139 +43,68 @@ const ProfileSidebar = ({ active, setActive }) => {
   };
 
   return (
-    <div className="w-full bg-white shadow-sm rounded-[10px] p-4 pt-8">
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(1)}
-      >
-        <RxPerson size={20} color={active === 1 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 1 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Profile
-        </span>
+    <div className="w-full dashboard-sidebar rounded-2xl p-3 pt-4 min-h-[70vh]">
+      {/* User Card */}
+      <div className="sidebar-user-card">
+        <img
+          src={`${backend_url}${user?.avatar}`}
+          alt={user?.name}
+        />
+        <div className="800px:block hidden">
+          <div className="user-name">{user?.name}</div>
+          <div className="user-email">{user?.email}</div>
+        </div>
       </div>
 
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(2)}
-      >
-        <HiOutlineShoppingBag size={20} color={active === 2 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 2 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Orders
-        </span>
-      </div>
-
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(3)}
-      >
-        <HiOutlineReceiptRefund size={20} color={active === 3 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 3 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Refunds
-        </span>
-      </div>
-
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(4) || navigate("/inbox")}
-      >
-        <AiOutlineMessage size={20} color={active === 4 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 4 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          inbox
-        </span>
-      </div>
-
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(5)}
-      >
-        <MdOutlineTrackChanges size={20} color={active === 5 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 5 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Track Order
-        </span>
-      </div>
-
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(6)}
-      >
-        <RiLockPasswordLine size={20} color={active === 6 ? "red" : ""} />
-
-        <span
-          className={`pl-3 ${
-            active === 6 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Change password
-        </span>
-      </div>
-
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={() => setActive(7)}
-      >
-        <TbAddressBook size={20} color={active === 7 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 7 ? "text-[red]" : ""
-          } 800px:block hidden`}
-        >
-          Address
-        </span>
-      </div>
-
-      {user && user?.role === "Admin" && (
-        <Link to="/admin/dashboard">
-          <div
-            className="flex items-center cursor-pointer w-full mb-8"
-            onClick={() => setActive(8)}
-          >
-            <MdOutlineAdminPanelSettings
-              size={20}
-              color={active === 7 ? "red" : ""}
-            />
-            <span
-              className={`pl-3 ${
-                active === 8 ? "text-[red]" : ""
-              } 800px:block hidden`}
+      {/* Navigation Items */}
+      <div className="py-2">
+        {sidebarItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.id}
+              className={`sidebar-item ${active === item.id ? "active" : ""}`}
+              onClick={() => {
+                setActive(item.id);
+                if (item.navigateTo) navigate(item.navigateTo);
+              }}
             >
-              Admin Dashboard
-            </span>
-          </div>
-        </Link>
-      )}
+              <Icon size={20} className="sidebar-icon" />
+              <span className="sidebar-label 800px:block hidden">
+                {item.label}
+              </span>
+            </div>
+          );
+        })}
 
-      <div
-        className="flex items-center cursor-pointer w-full mb-8"
-        onClick={logoutHandler}
-      >
-        <AiOutlineLogin size={20} color={active === 8 ? "red" : ""} />
-        <span
-          className={`pl-3 ${
-            active === 8 ? "text-[red]" : ""
-          } 800px:block hidden`}
+        {/* Admin Dashboard Link */}
+        {user && (user?.role === "Admin" || user?.role === "admin") && (
+          <Link to="/admin/dashboard" style={{ textDecoration: "none" }}>
+            <div
+              className={`sidebar-item ${active === 8 ? "active" : ""}`}
+              onClick={() => setActive(8)}
+            >
+              <MdOutlineAdminPanelSettings size={20} className="sidebar-icon" />
+              <span className="sidebar-label 800px:block hidden">
+                Admin Dashboard
+              </span>
+            </div>
+          </Link>
+        )}
+
+        {/* Divider */}
+        <div className="mx-4 my-3 border-t border-[#EDE8E0]/60" />
+
+        {/* Logout */}
+        <div
+          className="sidebar-item hover:!bg-red-50 hover:!text-red-500"
+          onClick={logoutHandler}
         >
-          loguot
-        </span>
+          <AiOutlineLogin size={20} className="sidebar-icon" />
+          <span className="sidebar-label 800px:block hidden">
+            Logout
+          </span>
+        </div>
       </div>
     </div>
   );

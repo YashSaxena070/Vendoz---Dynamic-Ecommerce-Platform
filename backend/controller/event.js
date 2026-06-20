@@ -43,7 +43,9 @@ router.post(
 // get all events
 router.get("/get-all-events", async (req, res, next) => {
   try {
-    const events = await Event.find();
+    const blockedShops = await Shop.find({ isBlocked: true }, "_id");
+    const blockedShopIds = blockedShops.map((shop) => shop._id.toString());
+    const events = await Event.find({ shopId: { $nin: blockedShopIds } });
     res.status(201).json({
       success: true,
       events,
@@ -58,6 +60,13 @@ router.get(
   "/get-all-events/:id",
   catchAsyncErrors(async (req, res, next) => {
     try {
+      const shop = await Shop.findById(req.params.id);
+      if (shop && shop.isBlocked) {
+        return res.status(201).json({
+          success: true,
+          events: [],
+        });
+      }
       const events = await Event.find({ shopId: req.params.id });
 
       res.status(201).json({

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { RxCross1 } from "react-icons/rx";
-import styles from "../../styles/styles";
 import { Link } from "react-router-dom";
 import { IoBagHandleOutline } from "react-icons/io5";
 import { HiOutlineMinus, HiPlus } from "react-icons/hi";
@@ -13,7 +12,7 @@ const Cart = ({ setOpenCart }) => {
   const { cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
-  //remove from cart
+  // Remove from cart
   const removeFromCartHandler = (data) => {
     dispatch(removeFromCart(data));
   };
@@ -29,64 +28,70 @@ const Cart = ({ setOpenCart }) => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-[#0000004b] h-screen z-10">
-      <div className="fixed top-0 right-0 h-full w-[80%] 800px:w-[25%] bg-white flex flex-col overflow-y-scroll justify-between shadow-sm">
-        {cart && cart.length == 0 ? (
-          <div className="w-full h-screen flex items-center justify-center">
-            <div className="flex w-full justify-end pt-5 pr-5 fixed top-3 right-3">
-              <RxCross1
-                size={25}
-                className="cursor-pointer"
-                onClick={() => setOpenCart(false)}
-              />
+    <div className="fixed top-0 left-0 w-full bg-slate-900/60 backdrop-blur-sm h-screen z-[999] transition-opacity duration-300">
+      <div className="fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white flex flex-col justify-between shadow-2xl z-[1000] border-l border-slate-100 transition-transform duration-300">
+        {cart && cart.length === 0 ? (
+          <div className="w-full h-full flex flex-col items-center justify-center p-8 relative">
+            <button
+              onClick={() => setOpenCart(false)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+              aria-label="Close cart"
+            >
+              <RxCross1 size={18} />
+            </button>
+            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 mb-4 border border-slate-100">
+              <IoBagHandleOutline size={28} className="text-amber-500" />
             </div>
-            <h5>Cart items is empot!</h5>
+            <h5 className="text-base font-semibold text-slate-800">Your cart is empty!</h5>
+            <p className="text-xs text-slate-400 text-center mt-1.5 max-w-[200px]">
+              Add products to your cart and they will show up here.
+            </p>
           </div>
         ) : (
           <>
-            <div>
-              <div className="flex w-full justify-end pt-5 pr-5 ">
-                <RxCross1
-                  size={25}
-                  className="cursor-pointer"
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <IoBagHandleOutline size={22} className="text-amber-500" />
+                  <h3 className="text-lg font-bold text-[#1A1A2E]">
+                    Shopping Cart ({cart ? cart.length : 0})
+                  </h3>
+                </div>
+                <button
                   onClick={() => setOpenCart(false)}
-                />
-              </div>
-              {/* item length */}
-              <div className={`${styles.noramlFlex} p-4`}>
-                <IoBagHandleOutline size={25} />
-                <h5 className="pl-2 text-[20px] font-[500]">
-                  {cart && cart.length} items
-                </h5>
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-950 transition-colors"
+                  aria-label="Close cart"
+                >
+                  <RxCross1 size={18} />
+                </button>
               </div>
 
-              {/* Cart Single item */}
-              <br />
-              <div className="w-full border-t">
-                {cart &&
-                  cart.map((i, index) => {
-                    return (
-                      <CartSingle
-                        data={i}
-                        key={index}
-                        quantityChangeHandler={quantityChangeHandler}
-                        removeFromCartHandler={removeFromCartHandler}
-                      />
-                    );
-                  })}
+              {/* Cart Items List */}
+              <div className="flex-1 overflow-y-auto px-6 py-2 space-y-1">
+                {cart.map((item, index) => (
+                  <CartSingle
+                    data={item}
+                    key={index}
+                    quantityChangeHandler={quantityChangeHandler}
+                    removeFromCartHandler={removeFromCartHandler}
+                  />
+                ))}
               </div>
             </div>
 
-            <div className="px-5 mb-3">
-              {/* Check out btn */}
-              <Link to="/checkout">
-                <div
-                  className={`h-[45px] flex items-center justify-center w-[100%] bg-[#e44343] rounded-[5px]`}
-                >
-                  <h1 className="text-[#fff] text-[18px] font-[600]">
-                    Checkout Now (USD${totalPrice})
-                  </h1>
-                </div>
+            {/* Bottom Bar */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 shrink-0">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-slate-500">Subtotal</span>
+                <span className="text-xl font-extrabold text-[#1A1A2E]">
+                  US${totalPrice}
+                </span>
+              </div>
+              <Link to="/checkout" onClick={() => setOpenCart(false)}>
+                <button className="w-full h-[50px] bg-[#1A1A2E] hover:bg-amber-500 text-white hover:text-[#1A1A2E] font-bold rounded-xl transition-all duration-300 active:scale-[0.98] shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                  Proceed to Checkout
+                </button>
               </Link>
             </div>
           </>
@@ -104,67 +109,73 @@ const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler }) => {
     if (data.stock < value) {
       toast.error("Product stock limited!");
     } else {
-      setValue(value + 1);
-      /* The line `const updateCartData = { ...data, qty: value + 1 };` is creating a new object
-            `updateCartData` by spreading the properties of the `data` object and adding a new
-            property `qty` with the value of `value + 1`. This is typically used to update the
-            quantity of an item in the cart. */
-      const updateCartData = { ...data, qty: value + 1 };
-      quantityChangeHandler(updateCartData);
+      const newValue = value + 1;
+      setValue(newValue);
+      quantityChangeHandler({ ...data, qty: newValue });
     }
   };
 
-  // Decrement
   const decrement = (data) => {
-    setValue(value === 1 ? 1 : value - 1);
-    const updateCartData = { ...data, qty: value === 1 ? 1 : value - 1 };
-    quantityChangeHandler(updateCartData);
+    if (value > 1) {
+      const newValue = value - 1;
+      setValue(newValue);
+      quantityChangeHandler({ ...data, qty: newValue });
+    }
   };
 
   return (
-    <>
-      <div className="border-b p-4">
-        <div className="w-full flex items-center">
-          <div>
-            <div
-              className={`bg-[#e44343] border border-[#e4434373] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
-              onClick={() => increment(data)}
-            >
-              <HiPlus size={18} color="#fff" />
-            </div>
-            <span className="pl-[10px]">{data.qty}</span>
-            <div
-              className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer"
-              onClick={() => decrement(data)}
-            >
-              <HiOutlineMinus size={16} color="#7d879c" />
-            </div>
-          </div>
-          <img
-            src={`${backend_url}${data?.images[0]}`}
-            className="w-[130px] h-min ml-2 mr-2 rounded-[5px]"
-            alt="side card"
-          />
+    <div className="flex items-center gap-4 py-4 border-b border-slate-100 last:border-b-0">
+      {/* Quantity Pill Selector */}
+      <div className="flex flex-col items-center bg-slate-50 border border-slate-200/60 rounded-full py-1 px-1 shrink-0">
+        <button
+          onClick={() => increment(data)}
+          className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm transition-all"
+          aria-label="Increase quantity"
+        >
+          <HiPlus size={13} />
+        </button>
+        <span className="text-[12px] font-bold text-[#1A1A2E] my-1 w-6 text-center select-none">
+          {value}
+        </span>
+        <button
+          onClick={() => decrement(data)}
+          disabled={value === 1}
+          className="w-6 h-6 rounded-full flex items-center justify-center text-slate-600 hover:bg-white hover:shadow-sm disabled:opacity-40 disabled:hover:bg-transparent transition-all"
+          aria-label="Decrease quantity"
+        >
+          <HiOutlineMinus size={11} />
+        </button>
+      </div>
 
-          <div className="pl-[15px]">
-            <h1>{data.name}</h1>
-            <h4 className="font-[400] text-[15px] text-[#00000082]">
-              {" "}
-              ${data.discountPrice} * {value}
-            </h4>
-            <h4 className="font-[400] text-[17px] pt-[3px]  text-[#d02222] font-Roboto ">
-              US${totalPrice}
-            </h4>
-          </div>
-          <RxCross1
-            size={99}
-            color="#7d879c"
-            className="cursor-pointer"
-            onClick={() => removeFromCartHandler(data)}
-          />
+      {/* Product Image */}
+      <img
+        src={`${backend_url}${data?.images[0]}`}
+        alt={data.name}
+        className="w-[74px] h-[74px] object-contain bg-slate-50 border border-slate-100 rounded-xl shrink-0 p-1"
+      />
+
+      {/* Details */}
+      <div className="flex-1 min-w-0">
+        <h4 className="text-[13px] font-semibold text-[#1A1A2E] line-clamp-2 leading-snug hover:text-amber-600 transition-colors">
+          {data.name}
+        </h4>
+        <div className="text-[11px] text-slate-400 mt-1">
+          ${data.discountPrice} × {value}
+        </div>
+        <div className="text-sm font-extrabold text-[#1A1A2E] mt-1">
+          US${totalPrice}
         </div>
       </div>
-    </>
+
+      {/* Remove Button */}
+      <button
+        onClick={() => removeFromCartHandler(data)}
+        className="p-2 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors shrink-0"
+        title="Remove item"
+      >
+        <RxCross1 size={15} />
+      </button>
+    </div>
   );
 };
 

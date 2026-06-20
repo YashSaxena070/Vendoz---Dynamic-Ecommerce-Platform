@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 
 const EventCard = ({ active, data }) => {
   const { cart } = useSelector((state) => state.cart);
+  const { seller } = useSelector((state) => state.seller);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -16,6 +17,10 @@ const EventCard = ({ active, data }) => {
   }, []);
 
   const addToCartHandler = (data) => {
+    if (seller && (seller._id === data?.shopId || seller._id === data?.shop?._id)) {
+      toast.error("You cannot buy/add your own products!");
+      return;
+    }
     const isItemExists = cart && cart.find((i) => i._id === data._id);
     if (isItemExists) {
       toast.error("Item alredy in cart!");
@@ -30,34 +35,45 @@ const EventCard = ({ active, data }) => {
     }
   };
 
+  const displayName = data.name.replace(/^Vendoz\s+Super\s+Sale\s*-\s*/gi, "");
+
   return (
     <div
-      className={`w-full block bg-white rounded-lg ${
+      className={`w-full block bg-white rounded-3xl border border-slate-100/80 hover:shadow-[0_20px_50px_rgba(26,26,46,0.05)] transition-all duration-300 ${
         active ? "unset" : "mb-12"
-      } lg:flex p-2`}
+      } lg:flex p-6 gap-8`}
     >
-      <div className="w-full lg:w-[50%] m-auto">
-        <img src={`${backend_url}${data.images[0]}`} alt="" />
+      <div className="w-full lg:w-[30%] flex items-center justify-center bg-slate-50 rounded-2xl p-4 overflow-hidden aspect-square max-h-[260px] m-auto">
+        <img
+          src={`${backend_url}${data.images[0]}`}
+          alt={displayName}
+          className="max-w-full max-h-full object-contain hover:scale-105 transition-transform duration-300"
+        />
       </div>
 
-      <div className="w-full lg:[w-50%] flex flex-col justify-center">
-        <h2 className={`${styles.productTitle}`}>{data.name}</h2>
-        <p>{data.description}</p>
+      <div className="w-full lg:w-[70%] flex flex-col justify-center mt-4 lg:mt-0">
+        <h2 className={`${styles.productTitle} text-xl md:text-2xl font-bold text-[#1A1A2E] mb-2`}>
+          {displayName}
+        </h2>
+        <p className="text-slate-500 text-sm leading-relaxed mb-4">{data.description}</p>
 
-        <div className="flex py-2 justify-between">
-          <div className="flex">
-            <h5 className="font-[500] text-[18px] text-[#d55b45] pr-3 line-through">
+        <div className="flex py-2 justify-between items-center border-t border-b border-slate-100 my-2">
+          <div className="flex items-baseline gap-2">
+            <h5 className="font-medium text-sm text-slate-400 line-through">
               {data.originalPrice}$
             </h5>
-            <h5 className="font-bold text-[20px] text-[#333] font-Roboto">
+            <h5 className="font-extrabold text-2xl text-[#1A1A2E]">
               {data.discountPrice}$
             </h5>
           </div>
-          <span className="pr-3 font-[400] text-[17px] text-[#44a55e]">
+          <span className="font-bold text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
             {data.sold_out} sold
           </span>
         </div>
-        <CountDown data={data} />
+
+        <div className="mt-3">
+          <CountDown data={data} />
+        </div>
         <br />
         <div className="flex items-center">
           <Link to={`/product/${data._id}?isEvent=true`}>
@@ -73,6 +89,6 @@ const EventCard = ({ active, data }) => {
       </div>
     </div>
   );
-};
+}
 
 export default EventCard;

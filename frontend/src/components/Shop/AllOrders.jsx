@@ -15,11 +15,10 @@ const AllOrders = () => {
 
     useEffect(() => {
         dispatch(getAllOrdersOfShop(seller._id));
-    }, [dispatch]);
+    }, [dispatch, seller._id]);
 
     const columns = [
         { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
-
         {
             field: "status",
             headerName: "Status",
@@ -38,7 +37,6 @@ const AllOrders = () => {
             minWidth: 130,
             flex: 0.7,
         },
-
         {
             field: "total",
             headerName: "Total",
@@ -46,7 +44,6 @@ const AllOrders = () => {
             minWidth: 130,
             flex: 0.8,
         },
-
         {
             field: " ",
             flex: 1,
@@ -85,14 +82,27 @@ const AllOrders = () => {
             {isLoading ? (
                 <Loader />
             ) : (
-                <div className="w-full mx-8 pt-1 mt-10 bg-white">
-                    <DataGrid
-                        rows={row}
-                        columns={columns}
-                        pageSize={10}
-                        disableSelectionOnClick
-                        autoHeight
-                    />
+                <div className="w-full page-container">
+                    {/* Header */}
+                    <div className="page-header">
+                        <div className="flex items-center">
+                            <h2 className="section-title">All Orders</h2>
+                            <span className="count-badge">{row.length}</span>
+                        </div>
+                    </div>
+
+                    {/* Data Grid */}
+                    <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+                        <div className="data-grid-premium">
+                            <DataGrid
+                                rows={row}
+                                columns={columns}
+                                pageSize={10}
+                                disableSelectionOnClick
+                                autoHeight
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </>

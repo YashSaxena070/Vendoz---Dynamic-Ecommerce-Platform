@@ -1,29 +1,31 @@
-import ShopDashboardPage from "../pages/Shop/ShopDashboardPage";
+import SellerDashboardPage from "../pages/SellerDashboardPage";
 import ShopCreateProduct from "../pages/Shop/ShopCreateProduct";
-import ShopAllProducts from "../pages/Shop/ShopAllProducts";
+import ShopEditProduct from "../pages/Shop/ShopEditProduct";
+import SellerDashboardProducts from "../pages/SellerDashboardProducts";
 import ShopCreateEvents from "../pages/Shop/ShopCreateEvents";
-import ShopAllEvents from "../pages/Shop/ShopAllEvents";
+import SellerDashboardEvents from "../pages/SellerDashboardEvents";
 import ShopAllCoupouns from "../pages/Shop/ShopAllCoupouns";
 import ShopPreviewPage from "../pages/Shop/ShopPreviewPage";
-import ShopAllOrders from "../pages/Shop/ShopAllOrders";
+import SellerDashboardOrders from "../pages/SellerDashboardOrders";
 import ShopOrderDetails from "../pages/Shop/ShopOrderDetails";
 import ShopAllRefunds from "../pages/Shop/ShopAllRefunds";
 import ShopSettingsPage from "../pages/Shop/ShopSettingsPage";
-import ShopWithDrawMoneyPage from "../pages/Shop/ShopWithDrawMoneyPage";
+import SellerDashboardWithdraw from "../pages/SellerDashboardWithdraw";
 import ShopInboxPage from "../pages/Shop/ShopInboxPage";
 
 export {
-  ShopDashboardPage,
+  SellerDashboardPage,
   ShopCreateProduct,
-  ShopAllProducts,
+  ShopEditProduct,
+  SellerDashboardProducts,
   ShopCreateEvents,
-  ShopAllEvents,
+  SellerDashboardEvents,
   ShopAllCoupouns,
   ShopPreviewPage,
-  ShopAllOrders,
+  SellerDashboardOrders,
   ShopOrderDetails,
   ShopAllRefunds,
   ShopSettingsPage,
-  ShopWithDrawMoneyPage,
+  SellerDashboardWithdraw,
   ShopInboxPage,
 };

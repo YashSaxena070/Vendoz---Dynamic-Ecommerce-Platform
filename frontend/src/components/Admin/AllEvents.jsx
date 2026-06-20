@@ -80,14 +80,24 @@ const AllEvents = () => {
     });
 
   return (
-    <div className="w-full mx-8 pt-1 mt-10 bg-white">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-      />
+    <div className="w-full page-container">
+      <div className="page-header">
+        <div className="flex items-center">
+          <h2 className="section-title">All Events</h2>
+          <span className="count-badge">{row.length}</span>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+        <div className="data-grid-premium">
+          <DataGrid
+            rows={row}
+            columns={columns}
+            pageSize={10}
+            disableSelectionOnClick
+            autoHeight
+          />
+        </div>
+      </div>
     </div>
   );
 };

@@ -138,6 +138,15 @@ router.post(
         );
       }
 
+      if (user.isBlocked) {
+        return next(
+          new ErrorHandler(
+            "Your shop account has been blocked by the administrator. Please contact yashsaxena7668@gmail.com for assistance.",
+            403
+          )
+        );
+      }
+
       sendShopToken(user, 201, res);
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -213,7 +222,9 @@ router.put(
 
       const existAvatarPath = `uploads/${existsUser.avatar}`;
 
-      fs.unlinkSync(existAvatarPath);
+      if (existsUser.avatar && fs.existsSync(existAvatarPath)) {
+        fs.unlinkSync(existAvatarPath);
+      }
 
       const fileUrl = path.join(req.file.filename);
 
@@ -350,6 +361,54 @@ router.delete(
 
       res.status(201).json({
         success: true,
+        seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// block seller --- admin
+router.put(
+  "/admin-block-seller/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await Shop.findById(req.params.id);
+      if (!seller) {
+        return next(new ErrorHandler("Seller not found", 404));
+      }
+      seller.isBlocked = true;
+      await seller.save();
+      res.status(200).json({
+        success: true,
+        message: "Seller blocked successfully!",
+        seller,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// unblock seller --- admin
+router.put(
+  "/admin-unblock-seller/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const seller = await Shop.findById(req.params.id);
+      if (!seller) {
+        return next(new ErrorHandler("Seller not found", 404));
+      }
+      seller.isBlocked = false;
+      await seller.save();
+      res.status(200).json({
+        success: true,
+        message: "Seller unblocked successfully!",
         seller,
       });
     } catch (error) {

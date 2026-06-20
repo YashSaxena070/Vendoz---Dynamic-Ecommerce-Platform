@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./App.css";
 import Store from "./redux/store";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import {
   LoginPage,
   SignupPage,
@@ -24,18 +24,19 @@ import {
   UserInbox,
 } from "./routes/Routes";
 import {
-  ShopDashboardPage,
+  SellerDashboardPage,
   ShopCreateProduct,
-  ShopAllProducts,
+  ShopEditProduct,
+  SellerDashboardProducts,
   ShopCreateEvents,
-  ShopAllEvents,
+  SellerDashboardEvents,
   ShopAllCoupouns,
   ShopPreviewPage,
-  ShopAllOrders,
+  SellerDashboardOrders,
   ShopOrderDetails,
   ShopAllRefunds,
   ShopSettingsPage,
-  ShopWithDrawMoneyPage,
+  SellerDashboardWithdraw,
   ShopInboxPage,
 } from "./routes/ShopRoutes";
 
@@ -49,7 +50,7 @@ import {
   AdminDashboardWithdraw,
 } from "./routes/AdminRoutes";
 
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
 import { loadSeller, loadUser } from "./redux/actions/user";
@@ -63,6 +64,36 @@ import axios from "axios";
 import { server } from "./server";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import BlockedScreen from "./components/Layout/BlockedScreen";
+
+const BlockCheckWrapper = ({ children }) => {
+  const { error: userError } = useSelector((state) => state.user);
+  const { error: sellerError } = useSelector((state) => state.seller);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userError && (userError.includes("ACCOUNT_BLOCKED") || userError.includes("blocked"))) {
+      navigate("/blocked?type=user");
+    }
+    if (sellerError && (sellerError.includes("ACCOUNT_BLOCKED") || sellerError.includes("blocked"))) {
+      navigate("/blocked?type=seller");
+    }
+  }, [userError, sellerError, navigate]);
+
+  return children;
+};
+
+const ScrollToTop = () => {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname, search]);
+
+  return null;
+};
 
 const App = () => {
   const [stripeApikey, setStripeApiKey] = useState("");
@@ -82,23 +113,20 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      {stripeApikey && (
-        <Elements stripe={loadStripe(stripeApikey)}>
-          <Routes>
-            <Route
-              path="/payment"
-              element={
-                <ProtectedRoute>
+      <ScrollToTop />
+      <BlockCheckWrapper>
+        <Routes>
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <Elements stripe={stripeApikey ? loadStripe(stripeApikey) : null}>
                   <PaymentPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Elements>
-      )}
-
-      <Routes>
-        <Route path="/" element={<HomePage />} />
+                </Elements>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/sign-up" element={<SignupPage />} />
         <Route
@@ -186,7 +214,7 @@ const App = () => {
           path="/dashboard"
           element={
             <SellerProtectedRoute>
-              <ShopDashboardPage />
+              <SellerDashboardPage />
             </SellerProtectedRoute>
           }
         />
@@ -198,12 +226,20 @@ const App = () => {
             </SellerProtectedRoute>
           }
         />
+        <Route
+          path="/dashboard-edit-product/:id"
+          element={
+            <SellerProtectedRoute>
+              <ShopEditProduct />
+            </SellerProtectedRoute>
+          }
+        />
 
         <Route
           path="/dashboard-orders"
           element={
             <SellerProtectedRoute>
-              <ShopAllOrders />
+              <SellerDashboardOrders />
             </SellerProtectedRoute>
           }
         />
@@ -230,7 +266,7 @@ const App = () => {
           path="/dashboard-products"
           element={
             <SellerProtectedRoute>
-              <ShopAllProducts />
+              <SellerDashboardProducts />
             </SellerProtectedRoute>
           }
         />
@@ -239,7 +275,7 @@ const App = () => {
           path="/dashboard-withdraw-money"
           element={
             <SellerProtectedRoute>
-              <ShopWithDrawMoneyPage />
+              <SellerDashboardWithdraw />
             </SellerProtectedRoute>
           }
         />
@@ -265,7 +301,7 @@ const App = () => {
           path="/dashboard-events"
           element={
             <SellerProtectedRoute>
-              <ShopAllEvents />
+              <SellerDashboardEvents />
             </SellerProtectedRoute>
           }
         />
@@ -335,6 +371,7 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         />
+        <Route path="/blocked" element={<BlockedScreen />} />
       </Routes>
       <ToastContainer
         position="bottom-center"
@@ -348,6 +385,7 @@ const App = () => {
         pauseOnHover
         theme="dark"
       />
+      </BlockCheckWrapper>
     </BrowserRouter>
   );
 };

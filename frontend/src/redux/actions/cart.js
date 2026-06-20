@@ -1,3 +1,6 @@
+import axios from "axios";
+import { server } from "../../server";
+
 // add To cart
 
 export const addTocart = (data) => async (dispatch, getState) => {
@@ -5,6 +8,12 @@ export const addTocart = (data) => async (dispatch, getState) => {
     type: "addToCart",
     payload: data,
   });
+
+  try {
+    await axios.put(`${server}/product/track-cart-addition/${data._id}`);
+  } catch (err) {
+    console.error("Failed to track product cart addition count", err);
+  }
 
   /* `localStorage.setItem("cartItems", JSON.stringify(getState().cart.cart));` is storing the cart
   items in the browser's local storage. */

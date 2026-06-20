@@ -2,141 +2,58 @@ import React from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { GrWorkshop } from "react-icons/gr";
 import { RxDashboard } from "react-icons/rx";
-import { CiMoneyBill, CiSettings } from "react-icons/ci";
+import { CiMoneyBill } from "react-icons/ci";
 import { Link } from "react-router-dom";
 import { HiOutlineUserGroup } from "react-icons/hi";
 import { BsHandbag } from "react-icons/bs";
 import { MdOutlineLocalOffer } from "react-icons/md";
 import { AiOutlineSetting } from "react-icons/ai";
 
+const navItems = [
+  { id: 1, label: "Dashboard", icon: RxDashboard, to: "/admin/dashboard" },
+  { id: 2, label: "All Orders", icon: FiShoppingBag, to: "/admin-orders" },
+  { id: 3, label: "All Sellers", icon: GrWorkshop, to: "/admin-sellers" },
+  { id: 4, label: "All Users", icon: HiOutlineUserGroup, to: "/admin-users" },
+  { id: 5, label: "All Products", icon: BsHandbag, to: "/admin-products" },
+  { id: 6, label: "All Events", icon: MdOutlineLocalOffer, to: "/admin-events" },
+  { id: 7, label: "Withdraw Request", icon: CiMoneyBill, to: "/admin-withdraw-request" },
+  { id: 8, label: "Settings", icon: AiOutlineSetting, to: "/profile" },
+];
+
 const AdminSideBar = ({ active }) => {
   return (
-    <div className="w-full h-[90vh] bg-white shadow-sm overflow-y-scroll sticky top-0 left-0 z-10">
-      {/* single item */}
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin/dashboard" className="w-full flex items-center">
-          <RxDashboard
-            size={30}
-            color={`${active === 1 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 1 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            Dashboard
-          </h5>
-        </Link>
+    <div className="w-full h-[90vh] dashboard-sidebar overflow-y-auto sticky top-0 left-0 z-10 py-4">
+      {/* Title */}
+      <div className="px-5 mb-4">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
+          Admin Panel
+        </p>
       </div>
 
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-orders" className="w-full flex items-center">
-          <FiShoppingBag
-            size={30}
-            color={`${active === 2 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 2 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            All Orders
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-sellers" className="w-full flex items-center">
-          <GrWorkshop
-            size={30}
-            color={`${active === 3 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 3 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            All Sellers
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-users" className="w-full flex items-center">
-          <HiOutlineUserGroup
-            size={30}
-            color={`${active === 4 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 4 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            All Users
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-products" className="w-full flex items-center">
-          <BsHandbag size={30} color={`${active === 5 ? "crimson" : "#555"}`} />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 5 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            All Products
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-events" className="w-full flex items-center">
-          <MdOutlineLocalOffer
-            size={30}
-            color={`${active === 6 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 6 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            All Events
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/admin-withdraw-request" className="w-full flex items-center">
-          <CiMoneyBill
-            size={30}
-            color={`${active === 7 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 7 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            Withdraw Request
-          </h5>
-        </Link>
-      </div>
-
-      <div className="w-full flex items-center p-4">
-        <Link to="/profile" className="w-full flex items-center">
-          <AiOutlineSetting
-            size={30}
-            color={`${active === 8 ? "crimson" : "#555"}`}
-          />
-          <h5
-            className={`hidden 800px:block pl-2 text-[18px] font-[400] ${
-              active === 8 ? "text-[crimson]" : "text-[#555]"
-            }`}
-          >
-            Settings
-          </h5>
-        </Link>
-      </div>
+      {/* Navigation */}
+      <nav className="space-y-[2px]">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const showDivider = item.id === 7 || item.id === 8;
+          return (
+            <React.Fragment key={item.id}>
+              {showDivider && (
+                <div className="mx-5 my-2 border-t border-[#EDE8E0]/60" />
+              )}
+              <Link to={item.to} style={{ textDecoration: "none" }}>
+                <div
+                  className={`sidebar-item ${active === item.id ? "active" : ""}`}
+                >
+                  <Icon size={20} className="sidebar-icon" />
+                  <span className="sidebar-label hidden 800px:block">
+                    {item.label}
+                  </span>
+                </div>
+              </Link>
+            </React.Fragment>
+          );
+        })}
+      </nav>
     </div>
   );
 };

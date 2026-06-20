@@ -18,10 +18,10 @@ import { addToWishlist, removeFromWishlist } from '../../../redux/actions/wishli
 const ProductDetailsCard = ({ setOpen, data }) => {
     const { cart } = useSelector((state) => state.cart);
     const { wishlist } = useSelector((state) => state.wishlist);
+    const { seller } = useSelector((state) => state.seller);
     const dispatch = useDispatch();
     const [count, setCount] = useState(1)
     const [click, setClick] = useState(false)
-    const [select, setSelect] = useState(false)
 
     const handleMessageSubmit = () => {
 
@@ -38,6 +38,10 @@ const ProductDetailsCard = ({ setOpen, data }) => {
 
     // Add to cart
     const addToCartHandler = (id) => {
+        if (seller && seller._id === data.shopId) {
+            toast.error("You cannot buy/add your own products!")
+            return
+        }
         const isItemExists = cart && cart.find((i) => i._id === id);
 
         if (isItemExists) {
@@ -60,7 +64,7 @@ const ProductDetailsCard = ({ setOpen, data }) => {
         } else {
             setClick(false);
         }
-    }, [wishlist]);
+    }, [wishlist, data._id]);
 
     // Remove from wish list 
     const removeFromWishlistHandler = (data) => {

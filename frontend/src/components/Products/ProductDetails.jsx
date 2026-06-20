@@ -24,6 +24,7 @@ const ProductDetails = ({ data }) => {
   const { user, isAuthenticated } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
   const { cart } = useSelector((state) => state.cart);
+  const { seller } = useSelector((state) => state.seller);
   const dispatch = useDispatch();
 
   const [count, setCount] = useState(1);
@@ -38,7 +39,7 @@ const ProductDetails = ({ data }) => {
     } else {
       setClick(false);
     }
-  }, [data, wishlist]);
+  }, [data, wishlist, dispatch]);
 
   // Remove from wish list
   const removeFromWishlistHandler = (data) => {
@@ -54,6 +55,10 @@ const ProductDetails = ({ data }) => {
 
   // Add to cart
   const addToCartHandler = (id) => {
+    if (seller && (seller._id === data?.shopId || seller._id === data?.shop?._id)) {
+      toast.error("You cannot buy/add your own products!");
+      return;
+    }
     const isItemExists = cart && cart.find((i) => i._id === id);
 
     if (isItemExists) {

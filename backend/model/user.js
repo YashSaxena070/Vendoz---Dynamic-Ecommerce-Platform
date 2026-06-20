@@ -44,6 +44,7 @@ const userSchema = new mongoose.Schema({
   ],
   role: {
     type: String,
+    enum: ["user", "User", "seller", "Seller", "admin", "Admin"],
     default: "user",
   },
   avatar: {
@@ -53,6 +54,10 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now(),
+  },
+  isBlocked: {
+    type: Boolean,
+    default: false,
   },
   resetPasswordToken: String,
   resetPasswordTime: Date,
@@ -69,7 +74,7 @@ userSchema.pre("save", async function (next) {
 
 // jwt token
 userSchema.methods.getJwtToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+  return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES,
   });
 };

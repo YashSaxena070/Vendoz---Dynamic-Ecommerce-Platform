@@ -21,7 +21,6 @@ const UserInbox = () => {
   const [newMessage, setNewMessage] = useState("");
   const [userData, setUserData] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const [images, setImages] = useState();
   const [activeStatus, setActiveStatus] = useState(false);
   const [open, setOpen] = useState(false);
   const scrollRef = useRef(null);
@@ -149,7 +148,6 @@ const UserInbox = () => {
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    setImages(file);
     imageSendingHandler(file);
   };
 
@@ -179,7 +177,6 @@ const UserInbox = () => {
           },
         })
         .then((res) => {
-          setImages();
           setMessages([...messages, res.data.message]);
           updateLastMessageForImage();
         });
@@ -206,7 +203,7 @@ const UserInbox = () => {
     <div className="w-full">
       {!open && (
         <>
-          <Header />
+          <Header isNavbarHidden={true} />
           <h1 className="text-center text-[30px] py-3 font-Poppins">
             All Messages
           </h1>
@@ -279,7 +276,7 @@ const MessageList = ({
       }
     };
     getUser();
-  }, [me, data]);
+  }, [me, data, online, setActiveStatus]);
 
   return (
     <div
@@ -374,6 +371,7 @@ const SellerInbox = ({
                 <img
                   src={`${backend_url}${item.images}`}
                   className="w-[300px] h-[300px] object-cover rounded-[10px] ml-2 mb-2"
+                  alt="sent"
                 />
               )}
               {item.text !== "" && (
@@ -397,7 +395,6 @@ const SellerInbox = ({
 
       {/* send message input */}
       <form
-        aria-required={true}
         className="p-3 relative w-full flex justify-between items-center"
         onSubmit={sendMessageHandler}
       >

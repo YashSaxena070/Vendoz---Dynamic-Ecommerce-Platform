@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import styles from "../../styles/styles";
-import logo from "../../logo.svg";
-import { productData, categoriesData } from "../../static/data";
+import logo from "../../vendoz-logo.svg";
+import { categoriesData } from "../../static/data";
 import {
   AiOutlineHeart,
   AiOutlineSearch,
@@ -11,15 +11,26 @@ import {
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { BiMenuAltLeft } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
+import { RxCross1 } from "react-icons/rx";
+import { FiMapPin } from "react-icons/fi";
+import { toast } from "react-toastify";
 import DropDown from "./DropDown";
 import Navbar from "./Navbar";
 import { useSelector } from "react-redux";
 import { backend_url } from "../../server";
 import Cart from "../cart/Cart";
 import Wishlist from "../Wishlist/Wishlist";
-import { RxCross1 } from "react-icons/rx";
+import ProfileDrawer from "./ProfileDrawer";
 
-const Header = ({ activeHeading }) => {
+const TICKER_ITEMS = [
+  "🎉 Free shipping on orders over $49",
+  "✨ New arrivals every week — shop now",
+  "🔐 Secure checkout guaranteed",
+  "🛍️ Earn rewards on every purchase",
+  "📦 Easy 30-day returns",
+];
+
+const Header = ({ activeHeading, isNavbarHidden, isCheckout }) => {
   const { isSeller } = useSelector((state) => state.seller);
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -31,333 +42,665 @@ const Header = ({ activeHeading }) => {
   const [dropDown, setDropDown] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
-  const [open, setOpen] = useState(false); // mobile menu
+  const [open, setOpen] = useState(false);
+  const [openProfileDrawer, setOpenProfileDrawer] = useState(false);
+  const [profileDrawerType, setProfileDrawerType] = useState("user");
+  const [showStickySearch, setShowStickySearch] = useState(false);
 
-  // Handle search change
+  const [pincode, setPincode] = useState(localStorage.getItem("vendoz_pincode") || "");
+  const [showPincodeModal, setShowPincodeModal] = useState(false);
+  const [tempPincode, setTempPincode] = useState("");
+
+  const desktopSearchRef = useRef(null);
+  const mobileSearchRef = useRef(null);
+  const stickySearchRef = useRef(null);
+  const stickySearchInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isClickInsideDesktop =
+        desktopSearchRef.current && desktopSearchRef.current.contains(event.target);
+      const isClickInsideMobile =
+        mobileSearchRef.current && mobileSearchRef.current.contains(event.target);
+      const isClickInsideSticky =
+        stickySearchRef.current && stickySearchRef.current.contains(event.target);
+
+      if (!isClickInsideDesktop && !isClickInsideMobile && !isClickInsideSticky) {
+        setSearchData(null);
+        setShowStickySearch(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showStickySearch && stickySearchInputRef.current) {
+      stickySearchInputRef.current.focus();
+    }
+  }, [showStickySearch]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setActive(window.scrollY > 70);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-
-    // Filter products
-    const filteredProducts =
-      allProducts &&
-      allProducts.filter((product) =>
-        product.name.toLowerCase().includes(term.toLowerCase())
-      );
-    setSearchData(filteredProducts);
+    if (term.trim() === "") {
+      setSearchData(null);
+    } else {
+      const filtered =
+        allProducts &&
+        allProducts.filter((p) =>
+          p.name.toLowerCase().includes(term.toLowerCase())
+        );
+      setSearchData(filtered);
+    }
   };
 
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 70) {
-      setActive(true);
-    } else {
-      setActive(false);
+  const handleSearchFocus = () => {
+    if (searchTerm.trim() !== "") {
+      const filtered =
+        allProducts &&
+        allProducts.filter((p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      setSearchData(filtered);
     }
-  });
+  };
+
+  const tickerText = TICKER_ITEMS.join("   ·   ");
 
   return (
     <>
-      <div className={`${styles.section}`}>
-        <div className="hidden 800px:h-[50px] 800px:my-[20px] 800px:flex items-center justify-between ">
-          <div>
-            <Link to="/">
-              <img src={logo} alt="Vendoz" className="h-10" />
-            </Link>
+      {/* ── Announcement ticker ── */}
+      {!isCheckout && (
+        <div className="announce-bar overflow-hidden py-2 text-[12px] font-medium tracking-wide select-none">
+          <div className="ticker-inner inline-block">
+            {[tickerText, tickerText].map((t, i) => (
+              <span key={i} className="inline-block px-8 opacity-90">
+                {t}
+              </span>
+            ))}
           </div>
-          {/*Search box  */}
-          <div className="w-[50%] relative">
-            <input
-              type="text"
-              placeholder="Search for product..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className={`${styles.input} h-[44px] pl-4 pr-12`}
-            />
-            <AiOutlineSearch
-              size={22}
-              className="absolute right-4 top-3 text-gray-400 cursor-pointer"
-            />
-            {
-              // Search data if length is not 0 then show
-              searchData && searchData.length !== 0 ? (
-                <div className="absolute min-h-[30vh] bg-slate-50 shadow-sm-2 z-[9] p-4">
-                  {searchData &&
-                    searchData.map((i, index) => {
-                      const d = i.name;
+        </div>
+      )}
 
-                      return (
-                        <Link to={`/product/${i._id}`}>
-                          <div className="w-full flex items-start-py-3">
-                            <img
-                              src={`${backend_url}${i.images[0]}`}
-                              alt="img"
-                              className="w-[40px] h-[40px] mr-[10px]"
-                            />
-                            <h1>{i.name}</h1>
-                          </div>
-                        </Link>
-                      );
-                    })}
+      {/* ── Desktop top bar ── */}
+      <div className="w-full bg-[#FAF9F6] border-b border-[#EDE8E0]/40 shadow-[0_1px_2px_rgba(26,26,46,0.02)] py-3 select-none">
+        <div className={`${styles.section}`}>
+          <div className="hidden 800px:flex 800px:h-[64px] items-center justify-between gap-8">
+            {/* Logo */}
+            <Link to="/" className="shrink-0">
+              <img src={logo} alt="Vendoz" className="h-9 hover:scale-105 transition-transform duration-200" />
+            </Link>
+
+            {/* Search */}
+            {!isCheckout && (
+              <div ref={desktopSearchRef} className="w-[48%] relative">
+                <div className="relative flex items-center bg-white border border-slate-200/80 rounded-full transition-all duration-300 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-500/10 focus-within:shadow-md">
+                  <input
+                    type="text"
+                    placeholder="Search for anything…"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    onFocus={handleSearchFocus}
+                    onClick={handleSearchFocus}
+                    className="w-full h-[46px] pl-6 pr-14 bg-transparent text-[#1A1A2E] text-[14px] font-medium outline-none placeholder-slate-400"
+                  />
+                  <div className="absolute right-1.5 top-1.5 bottom-1.5">
+                    <div className="h-[34px] w-[40px] rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-[#1A1A2E] flex items-center justify-center transition-all duration-200 shadow-sm cursor-pointer hover:shadow active:scale-95">
+                      <AiOutlineSearch size={18} />
+                    </div>
+                  </div>
                 </div>
-              ) : null
-            }
-          </div>
-          {/* Search end */}
-
-          {/* Become a Seller */}
-          <div>
-            <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
-              <div className={`${styles.button}`}>
-                <span className="flex items-center">
-                  {isSeller ? "Go Dashboard" : "Become Seller"}
-                  <IoIosArrowForward className="ml-2" />
-                </span>
+                {searchData && searchData.length !== 0 && (
+                  <div className="absolute top-[54px] left-0 w-full bg-white border border-[#EDE8E0] rounded-2xl shadow-xl z-[99] max-h-[360px] overflow-y-auto p-2 space-y-1">
+                    {searchData.map((item, index) => (
+                      <Link to={`/product/${item._id}`} key={index}>
+                        <div className="flex items-center gap-3 p-2.5 hover:bg-[#FEF9F0] rounded-xl transition-colors cursor-pointer">
+                          <img
+                            src={`${backend_url}${item.images[0]}`}
+                            alt="img"
+                            className="w-10 h-10 rounded-lg object-cover border border-[#EDE8E0] shrink-0"
+                          />
+                          <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-1">
+                            {item.name}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            </Link>
+            )}
+
+            {/* CTA & Pincode container */}
+            {!isCheckout && (
+              <div className="flex items-center gap-4 shrink-0">
+                {user?.role !== "Admin" && user?.role !== "admin" && (
+                  <div 
+                    onClick={() => {
+                      setTempPincode(pincode);
+                      setShowPincodeModal(true);
+                    }}
+                    className="flex items-center gap-2.5 px-4 py-2 bg-white hover:bg-[#FEF9F0]/20 border border-slate-200 hover:border-amber-400/50 rounded-full cursor-pointer transition-all duration-200 shadow-sm select-none group relative"
+                  >
+                    <FiMapPin className="text-amber-500 group-hover:scale-110 transition-transform duration-200" size={18} />
+                    <div className="flex flex-col text-left">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider leading-none">Deliver to</span>
+                      <span className={`text-[12px] font-bold leading-tight ${pincode ? 'text-slate-800' : 'text-rose-500 font-extrabold animate-pulse'}`}>
+                        {pincode ? pincode : "Set Pincode"}
+                      </span>
+                    </div>
+                    {!pincode && (
+                      <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {user?.role !== "Admin" && user?.role !== "admin" && (
+                  <Link to={isSeller ? "/dashboard" : "/shop-create"}>
+                    <div className="btn-amber inline-flex items-center justify-center px-6 py-2.5 text-white rounded-full font-bold text-[14px] tracking-wide cursor-pointer hover:scale-[1.03] active:scale-[0.97] hover:shadow-lg transition-all duration-300">
+                      {isSeller ? "Go to Dashboard" : "Become a Seller"}
+                      <IoIosArrowForward className="ml-2" size={14} />
+                    </div>
+                  </Link>
+                )}
+
+                {isNavbarHidden && (
+                  <div className="flex items-center gap-5 border-l border-slate-200/80 pl-5 ml-1">
+                    {/* Wishlist */}
+                    <button
+                      className="relative text-slate-700 hover:text-amber-500 transition-colors flex items-center justify-center"
+                      onClick={() => setOpenWishlist(true)}
+                      aria-label="Wishlist"
+                    >
+                      <AiOutlineHeart size={24} />
+                      {wishlist?.length > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-bold text-[#1A1A2E] flex items-center justify-center">
+                          {wishlist.length}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Cart */}
+                    <button
+                      className="relative text-slate-700 hover:text-amber-500 transition-colors flex items-center justify-center"
+                      onClick={() => setOpenCart(true)}
+                      aria-label="Cart"
+                    >
+                      <AiOutlineShoppingCart size={24} />
+                      {cart?.length > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-bold text-[#1A1A2E] flex items-center justify-center">
+                          {cart.length}
+                        </span>
+                      )}
+                    </button>
+
+                    {/* Profile */}
+                    <div className="relative cursor-pointer flex items-center">
+                      {isAuthenticated ? (
+                        <div onClick={() => { setProfileDrawerType("user"); setOpenProfileDrawer(true); }} className="flex items-center">
+                          <img
+                            src={`${backend_url}${user.avatar}`}
+                            className="w-[34px] h-[34px] rounded-full border-2 border-amber-400/60 object-cover hover:border-amber-400 hover:scale-105 transition-all duration-200"
+                            alt="Profile"
+                          />
+                        </div>
+                      ) : (
+                        <Link to="/login" className="flex items-center text-slate-700 hover:text-amber-500 transition-colors">
+                          <CgProfile size={24} />
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          {/* Become a Seller end */}
         </div>
       </div>
 
-      {/*  2nd part of header start */}
-      <div
-        className={`${
-          active == true ? "shadow-sm fixed top-0 left-0 z-10" : null
-        } transition hidden 800px:flex items-center justify-between w-full bg-[#3321c8] h-[70px]`}
-      >
-        <div
-          className={`${styles.section} relative ${styles.noramlFlex} justify-between`}
-        >
-          {/* Catagories */}
-          <div onClick={() => setDropDown(!dropDown)}>
-            <div className="relative h-[60px] mt-[10px] w-[270px] hidden 1000px:block">
-              <BiMenuAltLeft size={30} className="absolute top-3 left-2" />
-              <button
-                className={`h-[100%] w-full flex justify-between items-center pl-10 bg-white font-sans text-lg font-[500] select-none rounded-t-md`}
-              >
-                All Categories
-              </button>
-              <IoIosArrowDown
-                size={20}
-                className="absolute right-2 top-4 cursor-pointer"
-                onClick={() => setDropDown(!dropDown)}
-              />
-              {dropDown ? (
-                <DropDown
-                  categoriesData={categoriesData}
-                  setDropDown={setDropDown}
-                />
-              ) : null}
-            </div>
-          </div>
-
-          {/* NavItems */}
-          <div className={`${styles.noramlFlex}`}>
-            <Navbar active={activeHeading} />
-          </div>
-
-          <div className="flex">
-            <div className={`${styles.noramlFlex}`}>
-              <div
-                className="relative cursor-pointer mr-[15px]"
-                onClick={() => setOpenWishlist(true)}
-              >
-                <AiOutlineHeart size={30} color="rgb(255 255 255 / 83%)" />
-                <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-                  {wishlist && wishlist.length}
-                </span>
+      {/* ── Desktop nav bar ── */}
+      {!isNavbarHidden && !isCheckout && (
+        <>
+          {active && <div className="h-[62px] hidden 800px:block" />}
+          <div
+            className={`${
+              active ? "fixed top-0 left-0 z-50 shadow-md animate-[slideDown_0.2s_ease]" : ""
+            } hidden 800px:flex items-center w-full bg-[#1A1A2E] h-[62px] transition-all duration-300`}
+          >
+            <div
+              className={`${styles.section} relative ${styles.noramlFlex} justify-between w-full`}
+            >
+              {/* Categories dropdown */}
+              <div className="relative">
+                <div
+                  className="hidden 1000px:flex items-center gap-2 h-[44px] px-5 bg-white/10 hover:bg-white/15 rounded-full cursor-pointer transition-colors select-none"
+                  onClick={() => setDropDown(!dropDown)}
+                >
+                  <BiMenuAltLeft size={18} className="text-white/70" />
+                  <span className="text-[13px] font-semibold text-white/90 tracking-wide">
+                    All Categories
+                  </span>
+                  <IoIosArrowDown
+                    size={14}
+                    className={`text-white/60 transition-transform duration-200 ${
+                      dropDown ? "rotate-180" : ""
+                    }`}
+                  />
+                </div>
+                {dropDown && (
+                  <DropDown
+                    categoriesData={categoriesData}
+                    setDropDown={setDropDown}
+                  />
+                )}
               </div>
-            </div>
 
-            <div className={`${styles.noramlFlex}`}>
-              <div
-                className="relative cursor-pointer mr-[15px]"
-                onClick={() => setOpenCart(true)}
-              >
-                <AiOutlineShoppingCart
-                  size={30}
-                  color="rgb(255 255 255 / 83%)"
-                />
-                <span className="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-                  {cart && cart.length}
-                </span>
+              {/* Nav links */}
+              <div className={`${styles.noramlFlex}`}>
+                <Navbar active={activeHeading} />
               </div>
-            </div>
 
-            {/* avatar */}
-            <div className={`${styles.noramlFlex}`}>
-              <div className="relative cursor-pointer mr-[15px]">
+              {/* Icons */}
+              <div className="flex items-center gap-5">
+                {/* Sticky Search bar */}
+                {active && (
+                  <div ref={stickySearchRef} className="animate-slide-search relative flex items-center">
+                    <div 
+                      className={`flex items-center bg-white/10 hover:bg-white/15 border border-white/10 rounded-full transition-all duration-300 ease-in-out relative sticky-search-pill ${
+                        showStickySearch ? "w-[280px] px-3.5 h-[36px]" : "w-[36px] h-[36px] justify-center cursor-pointer"
+                      }`}
+                      onClick={() => {
+                        if (!showStickySearch) {
+                          setShowStickySearch(true);
+                        }
+                      }}
+                    >
+                      {!showStickySearch && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <AiOutlineSearch size={20} className="text-white/80" />
+                        </div>
+                      )}
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        onFocus={handleSearchFocus}
+                        className={`bg-transparent text-white text-[13px] outline-none placeholder-white/50 w-full transition-all duration-300 ${
+                          showStickySearch ? "opacity-100 pr-6" : "w-0 h-0 opacity-0 pointer-events-none"
+                        }`}
+                        ref={stickySearchInputRef}
+                      />
+                      {showStickySearch && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowStickySearch(false);
+                            setSearchTerm("");
+                            setSearchData(null);
+                          }}
+                          className="absolute right-2.5 text-white/60 hover:text-white transition-colors flex items-center justify-center"
+                        >
+                          <RxCross1 size={14} />
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Search results dropdown for sticky search */}
+                    {showStickySearch && searchData && searchData.length !== 0 && (
+                      <div className="absolute top-[44px] right-0 w-[280px] bg-white border border-[#EDE8E0] rounded-2xl shadow-xl z-[99] max-h-[300px] overflow-y-auto p-2 space-y-1">
+                        {searchData.map((item, index) => (
+                          <Link to={`/product/${item._id}`} key={index} onClick={() => { setShowStickySearch(false); setSearchTerm(""); setSearchData(null); }}>
+                            <div className="flex items-center gap-3 p-2 hover:bg-[#FEF9F0] rounded-xl transition-colors cursor-pointer animate-[scaleUp_0.15s_ease]">
+                              <img
+                                src={`${backend_url}${item.images[0]}`}
+                                alt="img"
+                                className="w-8 h-8 rounded-lg object-cover border border-[#EDE8E0] shrink-0"
+                              />
+                              <span className="text-[12px] font-medium text-[#1A1A2E] line-clamp-1">
+                                {item.name}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Wishlist */}
+                <button
+                  className="relative text-white/80 hover:text-amber-300 transition-colors"
+                  onClick={() => setOpenWishlist(true)}
+                  aria-label="Wishlist"
+                >
+                  <AiOutlineHeart size={24} />
+                  {wishlist?.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-bold text-[#1A1A2E] flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </button>
+
+                {/* Cart */}
+                <button
+                  className="relative text-white/80 hover:text-amber-300 transition-colors"
+                  onClick={() => setOpenCart(true)}
+                  aria-label="Cart"
+                >
+                  <AiOutlineShoppingCart size={24} />
+                  {cart?.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-bold text-[#1A1A2E] flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  )}
+                </button>
+
+                {/* Profile */}
                 {isAuthenticated ? (
-                  <Link to="/profile">
+                  <div 
+                    onClick={() => {
+                      setProfileDrawerType("user");
+                      setOpenProfileDrawer(true);
+                    }}
+                    className="cursor-pointer"
+                  >
                     <img
                       src={`${backend_url}${user.avatar}`}
-                      className="w-[35px] h-[35px] rounded-full"
-                      alt=""
+                      className="w-[32px] h-[32px] rounded-full object-cover border-2 border-amber-400/60 hover:border-amber-400 transition-colors"
+                      alt="Profile"
                     />
-                  </Link>
+                  </div>
+                ) : isSeller ? (
+                  <div
+                    onClick={() => {
+                      setProfileDrawerType("seller");
+                      setOpenProfileDrawer(true);
+                    }}
+                    className="text-white/80 hover:text-amber-300 transition-colors cursor-pointer"
+                    title="Seller Dashboard"
+                  >
+                    <CgProfile size={24} />
+                  </div>
                 ) : (
-                  <Link to="/login">
-                    <CgProfile size={30} color="rgb(255 255 255 / 83%)" />
+                  <Link
+                    to="/login"
+                    className="text-white/80 hover:text-amber-300 transition-colors"
+                  >
+                    <CgProfile size={24} />
                   </Link>
                 )}
               </div>
             </div>
-            {/* Avatar end */}
-            {/* card  popup start */}
-            {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
-            {/* card popup end */}
-
-            {/* Wish list pop uo Start */}
-            {openWishlist ? (
-              <Wishlist setOpenWishlist={setOpenWishlist} />
-            ) : null}
-            {/* Wish list pop uo end */}
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
-      {/* Mobile Header */}
+      {openCart && <Cart setOpenCart={setOpenCart} />}
+      {openWishlist && <Wishlist setOpenWishlist={setOpenWishlist} />}
+
+      {/* ── Mobile header ── */}
+      {active && <div className="h-[60px] 800px:hidden" />}
       <div
         className={`${
-          active === true ? "shadow-sm fixed top-0 left-0 z-10" : null
-        }
-            w-full h-[60px] bg-[#fff] z-50 top-0 left-0 shadow-sm 800px:hidden`}
+          active ? "fixed top-0 left-0 z-50 shadow-md" : ""
+        } w-full h-[60px] bg-white border-b border-[#EDE8E0] 800px:hidden flex items-center ${
+          isCheckout ? "justify-center" : "justify-between"
+        } px-4`}
       >
-        <div className="w-full flex items-center justify-between">
-          <div>
-            <BiMenuAltLeft
-              size={40}
-              className="ml-4"
-              onClick={() => setOpen(true)}
-            />
-          </div>
-          <div>
-            <Link to="/">
-              <img
-                src="https://shopo.quomodothemes.website/assets/images/logo.svg"
-                alt=""
-                className="mt-3 cursor-pointer"
-              />
-            </Link>
-          </div>
-
-          <div>
-            <div
-              className="relative mr-[20px]"
-              onClick={() => setOpenCart(true)}
-            >
-              <AiOutlineShoppingCart size={30} />
-              <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                {cart && cart.length}
+        {!isCheckout && (
+          <button onClick={() => setOpen(true)} aria-label="Open menu">
+            <BiMenuAltLeft size={32} className="text-[#1A1A2E]" />
+          </button>
+        )}
+        <Link to="/">
+          <img src={logo} alt="Vendoz" className="h-8" />
+        </Link>
+        {!isCheckout && (
+          <button
+            className="relative text-[#1A1A2E]"
+            onClick={() => setOpenCart(true)}
+            aria-label="Cart"
+          >
+            <AiOutlineShoppingCart size={28} />
+            {cart?.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-bold text-[#1A1A2E] flex items-center justify-center">
+                {cart.length}
               </span>
-            </div>
-          </div>
-          {/* cart popup */}
-          {openCart ? <Cart setOpenCart={setOpenCart} /> : null}
-
-          {/* wishlist popup */}
-          {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}
-        </div>
+            )}
+          </button>
+        )}
+        {!isCheckout && openCart && <Cart setOpenCart={setOpenCart} />}
+        {!isCheckout && openWishlist && <Wishlist setOpenWishlist={setOpenWishlist} />}
       </div>
 
-      {/*  side bar*/}
-      {open ? (
-        <div className={`fixed w-full bg-[#0000005f] z-20 h-full top-0 left-0`}>
-          <div className="fixed w-[70%] bg-[#fff] h-screen top-0 left-0 z-10 overflow-y-scroll">
-            <div className="w-full justify-between flex pr-3">
-              <div>
-                <div
-                  className="relative mr-[15px]"
-                  onClick={() => setOpenWishlist(true) || setOpen(false)}
-                >
-                  <AiOutlineHeart size={30} className="mt-5 ml-3" />
-                  <span class="absolute right-0 top-0 rounded-full bg-[#3bc177] w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                    {wishlist && wishlist.length}
-                  </span>
-                </div>
-              </div>
-
-              <RxCross1
-                size={30}
-                className="ml-4 mt-5 cursor-pointer"
-                onClick={() => setOpen(false)}
-              />
+      {/* ── Mobile drawer ── */}
+      {open && (
+        <div className="fixed inset-0 z-[60] flex">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+          <div className="relative w-[78%] max-w-xs bg-white h-full flex flex-col shadow-2xl overflow-y-auto">
+            {/* Drawer header */}
+            <div className="flex items-center justify-between p-5 border-b border-[#EDE8E0]">
+              <img src={logo} alt="Vendoz" className="h-8" />
+              <button onClick={() => setOpen(false)} className="text-slate-500 hover:text-[#1A1A2E]">
+                <RxCross1 size={22} />
+              </button>
             </div>
 
-            {/* Search Bar */}
-            <div className="my-8 w-[92%] m-auto h-[40px relative]">
-              <input
-                type="search"
-                placeholder="Search for products"
-                className="h-[40px] w-full px-2 border-[#3957db] border-[2px] rounded-md"
-                value={searchTerm}
-                onChange={handleSearchChange}
-              />
-
-              {searchData && (
-                <div className="absolute bg-[#fff] z-10 shadow w-full left-0 p-3">
-                  {searchData.map((i) => {
-                    const d = i.name;
-
-                    const Product_name = d.replace(/\s+/g, "-");
-                    return (
-                      <Link to={`/product/${Product_name}`}>
-                        <div className="flex items-center">
-                          <img
-                            src={i.image_Url[0].url}
-                            alt=""
-                            className="w-[50px] mr-2"
-                          />
-                          <h5>{i.name}</h5>
-                        </div>
-                      </Link>
-                    );
-                  })}
+            {/* Mobile search */}
+            <div ref={mobileSearchRef} className="px-5 py-4">
+              <div className="relative">
+                <input
+                  type="search"
+                  placeholder="Search products…"
+                  className={`${styles.input}`}
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={handleSearchFocus}
+                  onClick={handleSearchFocus}
+                />
+                <AiOutlineSearch
+                  size={18}
+                  className="absolute right-4 top-3 text-amber-400 pointer-events-none"
+                />
+              </div>
+              {searchData && searchData.length > 0 && (
+                <div className="mt-2 bg-white border border-[#EDE8E0] rounded-xl shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {searchData.map((item, i) => (
+                    <Link to={`/product/${item._id}`} key={i} onClick={() => setOpen(false)}>
+                      <div className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#FEF9F0] transition-colors">
+                        <img
+                          src={`${backend_url}${item.images[0]}`}
+                          className="w-9 h-9 rounded-lg object-cover border border-[#EDE8E0]"
+                          alt=""
+                        />
+                        <span className="text-[13px] font-medium text-[#1A1A2E] line-clamp-1">{item.name}</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
-            <Navbar active={activeHeading} />
-            <div className={`${styles.button} ml-4 !rounded-[4px]`}>
-              <Link to={`${isSeller ? "/dashboard" : "/shop-create"}`}>
-                <h1 className="text-[#fff] flex items-center">
-                  {isSeller ? "Go Dashboard" : "Become Seller"}{" "}
-                  <IoIosArrowForward className="ml-1" />
-                </h1>
-              </Link>
-            </div>
-            <br />
-            <br />
-            <br />
 
-            {/* Mob Login */}
-            <div className="flex w-full justify-center">
+            {/* Nav */}
+            <div className="px-5 flex-1">
+              <Navbar active={activeHeading} />
+            </div>
+
+            {/* Bottom actions */}
+            <div className="p-5 border-t border-[#EDE8E0] space-y-3">
+              {user?.role !== "Admin" && user?.role !== "admin" && (
+                <div 
+                  onClick={() => {
+                    setTempPincode(pincode);
+                    setShowPincodeModal(true);
+                    setOpen(false);
+                  }}
+                  className="flex items-center justify-between px-4 py-3 bg-[#F9F7F4] border border-[#EDE8E0] rounded-xl cursor-pointer hover:bg-slate-50 transition-all duration-200 select-none group"
+                >
+                  <div className="flex items-center gap-2">
+                    <FiMapPin className="text-amber-500 group-hover:scale-110 transition-transform duration-200" size={18} />
+                    <div className="flex flex-col text-left">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none">Deliver to</span>
+                      <span className={`text-[12px] font-bold leading-tight ${pincode ? 'text-slate-800' : 'text-rose-500'}`}>
+                        {pincode ? pincode : "Set Pincode"}
+                      </span>
+                    </div>
+                  </div>
+                  {!pincode ? (
+                    <span className="text-[10px] font-semibold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
+                      Required
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                      Active
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {user?.role !== "Admin" && user?.role !== "admin" && (
+                <Link
+                  to={isSeller ? "/dashboard" : "/shop-create"}
+                  onClick={() => setOpen(false)}
+                >
+                  <div className={`${styles.button} w-full justify-center`}>
+                    {isSeller ? "Go to Dashboard" : "Become a Seller"}
+                    <IoIosArrowForward className="ml-2" size={14} />
+                  </div>
+                </Link>
+              )}
+
               {isAuthenticated ? (
-                <div>
-                  <Link to="/profile">
-                    <img
-                      src={`${backend_url}${user.avatar}`}
-                      alt="Profile img"
-                      className="w-[60px] h-[60px] rounded-full border-[3px] border-[#0eae88]"
-                    />
-                  </Link>
+                <div 
+                  onClick={() => {
+                    setOpen(false);
+                    setProfileDrawerType("user");
+                    setOpenProfileDrawer(true);
+                  }}
+                  className="flex items-center gap-3 py-2 cursor-pointer"
+                >
+                  <img
+                    src={`${backend_url}${user.avatar}`}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-amber-400/60"
+                    alt="Profile"
+                  />
+                  <span className="font-semibold text-[#1A1A2E] text-sm">{user.name}</span>
+                </div>
+              ) : isSeller ? (
+                <div 
+                  onClick={() => {
+                    setOpen(false);
+                    setProfileDrawerType("seller");
+                    setOpenProfileDrawer(true);
+                  }}
+                  className="flex items-center gap-3 py-2 text-[#1A1A2E] hover:text-amber-600 transition-colors cursor-pointer"
+                >
+                  <CgProfile size={24} className="text-amber-500" />
+                  <span className="font-semibold text-sm">Dashboard</span>
                 </div>
               ) : (
-                <>
+                <div className="flex gap-3">
                   <Link
                     to="/login"
-                    className="text-[18px] pr-[10px] text-[#000000b7]"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 text-center py-2.5 rounded-full border border-[#EDE8E0] text-[14px] font-semibold text-[#1A1A2E] hover:bg-[#F9F7F4] transition-colors"
                   >
-                    Login{" "}
+                    Log in
                   </Link>
-                  <Link to="/sign-up" className="text-[18px] text-[#000000b7]">
-                    Sign up{" "}
+                  <Link
+                    to="/sign-up"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 text-center py-2.5 rounded-full bg-[#1A1A2E] text-[14px] font-semibold text-white hover:bg-[#2d2d4e] transition-colors"
+                  >
+                    Sign up
                   </Link>
-                </>
+                </div>
               )}
+
+              {/* Wishlist in drawer */}
+              <button
+                className="flex items-center gap-2 text-[13px] text-slate-500 hover:text-amber-600 transition-colors"
+                onClick={() => { setOpenWishlist(true); setOpen(false); }}
+              >
+                <AiOutlineHeart size={18} />
+                Wishlist ({wishlist?.length || 0})
+              </button>
             </div>
           </div>
         </div>
-      ) : null}
+      )}
+
+      {showPincodeModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white border border-[#EDE8E0] w-full max-w-sm rounded-2xl p-6 shadow-2xl relative mx-4 animate-[scaleUp_0.2s_ease]">
+            <button 
+              onClick={() => setShowPincodeModal(false)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-650 transition-colors"
+            >
+              <RxCross1 size={18} />
+            </button>
+            <h3 className="text-lg font-bold text-[#1A1A2E] mb-1">Set Delivery Location</h3>
+            <p className="text-xs text-slate-450 mb-4">
+              Enter your local 6-digit pincode to customize delivery options.
+            </p>
+            <div className="space-y-4">
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="e.g. 110001"
+                value={tempPincode}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  setTempPincode(val);
+                }}
+                className="appearance-none block w-full px-4 py-2.5 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 text-sm transition-all duration-200"
+              />
+              <button
+                onClick={() => {
+                  if (tempPincode.length === 6) {
+                    localStorage.setItem("vendoz_pincode", tempPincode);
+                    setPincode(tempPincode);
+                    setShowPincodeModal(false);
+                    toast.success("Delivery location updated successfully!");
+                  } else {
+                    toast.error("Please enter a valid 6-digit pincode!");
+                  }
+                }}
+                className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold rounded-xl transition-all duration-200 active:scale-[0.98] shadow-md shadow-amber-500/10 hover:shadow-lg cursor-pointer text-sm"
+              >
+                Save Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {openProfileDrawer && (
+        <ProfileDrawer 
+          setOpenProfileDrawer={setOpenProfileDrawer} 
+          drawerType={profileDrawerType}
+        />
+      )}
     </>
   );
 };

@@ -45,6 +45,13 @@ router.get(
   "/get-all-products-shop/:id",
   catchAsyncErrors(async (req, res, next) => {
     try {
+      const shop = await Shop.findById(req.params.id);
+      if (shop && shop.isBlocked) {
+        return res.status(201).json({
+          success: true,
+          products: [],
+        });
+      }
       const products = await Product.find({ shopId: req.params.id });
 
       res.status(201).json({
@@ -99,7 +106,10 @@ router.get(
   "/get-all-products",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const products = await Product.find().sort({ createdAt: -1 });
+      const blockedShops = await Shop.find({ isBlocked: true }, "_id");
+      const blockedShopIds = blockedShops.map((shop) => shop._id.toString());
+
+      const products = await Product.find({ shopId: { $nin: blockedShopIds } }).sort({ createdAt: -1 });
 
       res.status(201).json({
         success: true,
@@ -181,6 +191,80 @@ router.get(
       res.status(201).json({
         success: true,
         products,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// track cart addition count
+router.put(
+  "/track-cart-addition/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return next(new ErrorHandler("Product not found!", 404));
+      }
+      product.cartCount = (product.cartCount || 0) + 1;
+      await product.save({ validateBeforeSave: false });
+      res.status(200).json({
+        success: true,
+        cartCount: product.cartCount,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error, 400));
+    }
+  })
+);
+
+// get single product by id
+router.get(
+  "/get-product/:id",
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const product = await Product.findById(req.params.id);
+      if (!product) {
+        return next(new ErrorHandler("Product not found!", 404));
+      }
+      res.status(200).json({
+        success: true,
+        product,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// update product details
+router.put(
+  "/update-product/:id",
+  isSeller,
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const productId = req.params.id;
+      let product = await Product.findById(productId);
+      if (!product) {
+        return next(new ErrorHandler("Product not found!", 404));
+      }
+
+      const { name, description, category, tags, originalPrice, discountPrice, stock } = req.body;
+
+      product.name = name || product.name;
+      product.description = description || product.description;
+      product.category = category || product.category;
+      product.tags = tags || product.tags;
+      product.originalPrice = originalPrice || product.originalPrice;
+      product.discountPrice = discountPrice || product.discountPrice;
+      product.stock = typeof stock !== "undefined" ? stock : product.stock;
+
+      await product.save();
+
+      res.status(200).json({
+        success: true,
+        product,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

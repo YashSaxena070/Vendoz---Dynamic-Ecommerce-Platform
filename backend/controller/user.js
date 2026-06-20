@@ -19,16 +19,22 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
 
     if (userEmail) {
       // if user already exits account is not create and file is deleted
-      const filename = req.file.filename;
-      const filePath = `uploads/${filename}`;
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.log(err);
-          res.status(500).json({ message: "Error deleting file" });
-        }
-      });
+      if (req.file) {
+        const filename = req.file.filename;
+        const filePath = `uploads/${filename}`;
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ message: "Error deleting file" });
+          }
+        });
+      }
 
       return next(new ErrorHandler("User already exits", 400));
+    }
+
+    if (!req.file) {
+      return next(new ErrorHandler("Please upload an avatar image", 400));
     }
 
     const filename = req.file.filename;
@@ -99,6 +105,7 @@ router.post(
         email,
         avatar,
         password,
+        role: email === "yashsaxena7668@gmail.com" ? "Admin" : "user",
       });
       sendToken(user, 201, res);
     } catch (error) {
@@ -132,6 +139,20 @@ router.post(
           new ErrorHandler("Please provide the correct inforamtions", 400)
         );
       }
+      if (user.isBlocked) {
+        return next(
+          new ErrorHandler(
+            "Your account has been blocked by the administrator. Please contact yashsaxena7668@gmail.com for assistance.",
+            403
+          )
+        );
+      }
+
+      if (user.email === "yashsaxena7668@gmail.com" && user.role !== "Admin") {
+        user.role = "Admin";
+        await user.save();
+      }
+
       sendToken(user, 201, res);
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));
@@ -233,7 +254,9 @@ router.put(
 
       const existAvatarPath = `uploads/${existsUser.avatar}`;
 
-      fs.unlinkSync(existAvatarPath); // Delete Priviuse Image
+      if (existsUser.avatar && fs.existsSync(existAvatarPath)) {
+        fs.unlinkSync(existAvatarPath); // Delete Previous Image
+      }
 
       const fileUrl = path.join(req.file.filename); // new image
 
@@ -386,7 +409,7 @@ router.get(
   isAdmin("Admin"),
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const users = await User.find().sort({
+      const users = await User.find({ role: { $nin: ["admin", "Admin"] } }).sort({
         createdAt: -1,
       });
       res.status(201).json({
@@ -419,6 +442,54 @@ router.delete(
       res.status(201).json({
         success: true,
         message: "User deleted successfully!",
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// block user --- admin
+router.put(
+  "/admin-block-user/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+      user.isBlocked = true;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "User blocked successfully!",
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  })
+);
+
+// unblock user --- admin
+router.put(
+  "/admin-unblock-user/:id",
+  isAuthenticated,
+  isAdmin("Admin"),
+  catchAsyncErrors(async (req, res, next) => {
+    try {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+      user.isBlocked = false;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "User unblocked successfully!",
+        user,
       });
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

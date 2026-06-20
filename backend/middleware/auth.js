@@ -13,6 +13,32 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
   req.user = await User.findById(decoded.id);
+
+  if (!req.user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  if (req.user.email === "yashsaxena7668@gmail.com" && req.user.role !== "Admin") {
+    req.user.role = "Admin";
+    await req.user.save();
+  }
+
+  if (req.user.isBlocked) {
+    // Immediately clear the cookie so they are logged out server-side
+    res.cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
+    return next(
+      new ErrorHandler(
+        "ACCOUNT_BLOCKED:Your account has been blocked by the administrator. Please contact yashsaxena7668@gmail.com for assistance.",
+        403
+      )
+    );
+  }
+
   next();
 });
 
@@ -26,20 +52,38 @@ exports.isSeller = catchAsyncErrors(async (req, res, next) => {
 
   req.seller = await Shop.findById(decoded.id);
 
+  if (!req.seller) {
+    return next(new ErrorHandler("Seller not found", 404));
+  }
+
+  if (req.seller.isBlocked) {
+    // Immediately clear the cookie so they are logged out server-side
+    res.cookie("seller_token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
+    return next(
+      new ErrorHandler(
+        "ACCOUNT_BLOCKED:Your shop account has been blocked by the administrator. Please contact yashsaxena7668@gmail.com for assistance.",
+        403
+      )
+    );
+  }
+
   next();
 });
 
 exports.isAdmin = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role ? req.user.role.toLowerCase() : "";
+    const lowerRoles = roles.map((r) => r.toLowerCase());
+    if (!lowerRoles.includes(userRole)) {
       return next(
-        new ErrorHandler(`${req.user.role} can not access this resources!`)
+        new ErrorHandler(`${req.user.role} cannot access this resource!`, 403)
       );
     }
     next();
   };
 };
-
-// Why this auth?
-// This auth is for the user to login and get the token
-// This token will be used to access the protected routes like create, update, delete, etc. (autharization)

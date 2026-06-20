@@ -1,122 +1,123 @@
-import React from "react";
+import React from "react"
+import logo from "../../vendoz-logo-white.svg"
 import {
-    AiFillFacebook,
-    AiFillInstagram,
-    AiFillYoutube,
-    AiOutlineTwitter,
-} from "react-icons/ai";
-import { Link } from "react-router-dom";
+  AiFillFacebook,
+  AiFillInstagram,
+  AiFillYoutube,
+  AiOutlineTwitter,
+} from "react-icons/ai"
+import { Link } from "react-router-dom"
 import {
-    footercompanyLinks,
-    footerProductLinks,
-    footerSupportLinks,
-} from "../../static/data";
+  footercompanyLinks,
+  footerProductLinks,
+  footerSupportLinks,
+} from "../../static/data"
+
+const SOCIAL = [
+  { Icon: AiFillFacebook, href: "#", label: "Facebook" },
+  { Icon: AiOutlineTwitter, href: "#", label: "Twitter" },
+  { Icon: AiFillInstagram, href: "#", label: "Instagram" },
+  { Icon: AiFillYoutube, href: "#", label: "YouTube" },
+]
 
 const Footer = () => {
-    return (
-        <div className="bg-[#000] text-white">
-            <div className="md:flex md:justify-between md:items-center sm:px-12 px-4 bg-[#342ac8] py-7">
-                <h1 className="lg:text-4xl text-3xl md:mb-0 mb-6 lg:leading-normal font-semibold md:w-2/5">
-                    <span className="text-[#56d879]">Subscribe</span> us for get news{" "}
-                    <br />
-                    events and offers
-                </h1>
-                <div>
-                        <input
-                            type="email"
-                            required
-                            placeholder="Enter your email..."
-                            className="text-gray-800 sm:w-72 w-full sm:mr-5 mr-1 lg:mb-0 mb-4 py-2.5 rounded px-3 focus:outline-none"
-                        />
-                        <button className="bg-gradient-to-r from-[#06b6d4] to-[#3b82f6] hover:opacity-95 duration-300 px-5 py-2.5 rounded-md text-white md:w-auto w-full">
-                            Subscribe
-                        </button>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 sm:gird-cols-3 lg:grid-cols-4 gap-6 sm:px-8 px-5 py-16 sm:text-center">
-                <ul className="px-5 text-center sm:text-start flex sm:block flex-col items-center">
-                    <img
-                        src="https://shopo.quomodothemes.website/assets/images/logo.svg"
-                        alt=""
-                        style={{ filter: "brightness(0) invert(1)" }}
-                    />
-                    <br />
-                    <p>The home and elements needeed to create beatiful products.</p>
-                    <div className="flex items-center mt-[15px]">
-                        <AiFillFacebook size={25} className="cursor-pointer" />
-                        <AiOutlineTwitter
-                            size={25}
-                            style={{ marginLeft: "15px", cursor: "pointer" }}
-                        />
-                        <AiFillInstagram
-                            size={25}
-                            style={{ marginLeft: "15px", cursor: "pointer" }}
-                        />
-                        <AiFillYoutube
-                            size={25}
-                            style={{ marginLeft: "15px", cursor: "pointer" }}
-                        />
-                    </div>
-                </ul>
+  return (
+    <footer className="bg-[#0F0F1E] text-white">
 
-                <ul className="text-center sm:text-start">
-                    <h1 className="mb-1 font-semibold">Company</h1>
-                    {footerProductLinks.map((link, index) => (
-                        <li key={index}>
-                            <Link
-                                className="text-gray-400 hover:text-teal-400 duration-300
-                   text-sm cursor-pointer leading-6"
-                                to={link.link}
-                            >
-                                {link.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-
-                <ul className="text-center sm:text-start">
-                    <h1 className="mb-1 font-semibold">Shop</h1>
-                    {footercompanyLinks.map((link, index) => (
-                        <li key={index}>
-                            <Link
-                                className="text-gray-400 hover:text-teal-400 duration-300
-                   text-sm cursor-pointer leading-6"
-                                to={link.link}
-                            >
-                                {link.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-
-                <ul className="text-center sm:text-start">
-                    <h1 className="mb-1 font-semibold">Support</h1>
-                    {footerSupportLinks.map((link, index) => (
-                        <li key={index}>
-                            <Link
-                                className="text-gray-400 hover:text-teal-400 duration-300
-                   text-sm cursor-pointer leading-6"
-                                to={link.link}
-                            >
-                                {link.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 text-center pt-2 text-gray-400 text-sm pb-8">
-                <span>© {new Date().getFullYear()} Vendoz. All rights reserved.</span>
-                <span>Terms · Privacy Policy</span>
-                <div className="sm:block flex items-center justify-center w-full">
-                    <img
-                        src="https://hamart-shop.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffooter-payment.a37c49ac.png&w=640&q=75"
-                        alt=""
-                    />
-                </div>
-            </div>
+      {/* ── Newsletter band ── */}
+      <div className="border-b border-white/10">
+        <div className="w-11/12 mx-auto max-w-7xl py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <p className="text-amber-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1">
+              Stay in the loop
+            </p>
+            <h3
+              style={{ fontFamily: "'Playfair Display', serif" }}
+              className="text-[24px] md:text-[28px] font-bold text-white leading-tight"
+            >
+              Get deals, drops & news<br className="hidden md:block" /> straight to your inbox.
+            </h3>
+          </div>
+          <div className="flex w-full md:w-auto gap-2 flex-col sm:flex-row">
+            <input
+              type="email"
+              placeholder="your@email.com"
+              className="flex-1 sm:w-64 px-5 py-3 rounded-full bg-white/10 border border-white/10 text-white placeholder-white/40 text-[14px] focus:border-amber-400/60 focus:outline-none transition-colors"
+            />
+            <button className="btn-amber px-6 py-3 rounded-full text-[#1A1A2E] font-bold text-[13px] tracking-wide whitespace-nowrap">
+              Subscribe
+            </button>
+          </div>
         </div>
-    );
-};
+      </div>
 
-export default Footer;
+      {/* ── Main links ── */}
+      <div className="w-11/12 mx-auto max-w-7xl py-14 grid grid-cols-2 sm:grid-cols-4 gap-8">
+        {/* Brand col */}
+        <div className="col-span-2 sm:col-span-1">
+          <img src={logo} alt="Vendoz" className="h-8 mb-5" />
+          <p className="text-[13px] text-white/50 leading-relaxed max-w-[200px]">
+            Marketplace for unique products from independent sellers worldwide.
+          </p>
+          <div className="flex items-center gap-3 mt-5">
+            {SOCIAL.map(({ Icon, href, label }) => (
+              <a
+                key={label}
+                href={href}
+                aria-label={label}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-amber-500/20 hover:text-amber-400 flex items-center justify-center text-white/60 transition-colors"
+              >
+                <Icon size={16} />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Links */}
+        {[
+          { title: "Company", links: footerProductLinks },
+          { title: "Shop", links: footercompanyLinks },
+          { title: "Support", links: footerSupportLinks },
+        ].map(({ title, links }) => (
+          <div key={title}>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/40 mb-4">
+              {title}
+            </p>
+            <ul className="space-y-2.5">
+              {links.map((link, i) => (
+                <li key={i}>
+                  <Link
+                    to={link.link}
+                    className="text-[13px] text-white/60 hover:text-amber-400 transition-colors"
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Bottom bar ── */}
+      <div className="border-t border-white/10">
+        <div className="w-11/12 mx-auto max-w-7xl py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[12px] text-white/30">
+            © {new Date().getFullYear()} Vendoz. All rights reserved.
+          </p>
+          <div className="flex items-center gap-5">
+            <Link to="/privacy-policy" className="text-[12px] text-white/30 hover:text-white/60 transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="text-[12px] text-white/30 hover:text-white/60 transition-colors">Terms of Service</Link>
+          </div>
+          <img
+            src="https://hamart-shop.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffooter-payment.a37c49ac.png&w=640&q=75"
+            alt="Payment methods"
+            className="h-6 opacity-40 hidden sm:block"
+          />
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+export default Footer

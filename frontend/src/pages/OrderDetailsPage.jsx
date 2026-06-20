@@ -6,7 +6,7 @@ import UserOrderDetails from "../components/UserOrderDetails";
 const OrderDetailsPage = () => {
     return (
         <div>
-            <Header />
+            <Header isNavbarHidden={true} />
             <UserOrderDetails />
             <Footer />
         </div>

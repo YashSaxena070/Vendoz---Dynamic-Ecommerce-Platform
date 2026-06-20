@@ -28,13 +28,14 @@ const ShopInfo = ({ isOwner }) => {
             console.log(error);
             setIsLoading(false);
         })
-    }, [])
+    }, [dispatch, id])
 
 
     const logoutHandler = async () => {
         axios.get(`${server}/shop/logout`, {
             withCredentials: true,
         });
+        localStorage.removeItem("vendoz_pincode");
         window.location.reload();
     };
 

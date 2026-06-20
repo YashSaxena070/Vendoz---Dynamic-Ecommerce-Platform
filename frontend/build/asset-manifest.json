@@ -1,15 +1,18 @@
 {
   "files": {
-    "main.css": "/static/css/main.d275a19c.css",
-    "main.js": "/static/js/main.1db169fb.js",
-    "static/js/787.cda612ba.chunk.js": "/static/js/787.cda612ba.chunk.js",
+    "main.css": "/static/css/main.79a9d034.css",
+    "main.js": "/static/js/main.388a1ff3.js",
+    "static/js/27.07bc2567.chunk.js": "/static/js/27.07bc2567.chunk.js",
+    "static/media/lg-logo.svg": "/static/media/lg-logo.fc7ec1b3b9fd1ede732586c87a8770e2.svg",
+    "static/media/vendoz-logo-white.svg": "/static/media/vendoz-logo-white.ef81dce3367d865d19c98ca559586222.svg",
+    "static/media/vendoz-logo.svg": "/static/media/vendoz-logo.20917fda9f67db6d43a26c8a5a5c10f5.svg",
     "index.html": "/index.html",
-    "main.d275a19c.css.map": "/static/css/main.d275a19c.css.map",
-    "main.1db169fb.js.map": "/static/js/main.1db169fb.js.map",
-    "787.cda612ba.chunk.js.map": "/static/js/787.cda612ba.chunk.js.map"
+    "static/media/pet-category.svg": "/static/media/pet-category.b9cdb9d709704340567d0bf87148ee88.svg",
+    "static/media/gifts-category.svg": "/static/media/gifts-category.a7432b7e44c98d77503e9b61c115b44e.svg",
+    "static/media/shoes-category.svg": "/static/media/shoes-category.b4c3f27a008ce887caee7e7670ff0122.svg"
   },
   "entrypoints": [
-    "static/css/main.d275a19c.css",
-    "static/js/main.1db169fb.js"
+    "static/css/main.79a9d034.css",
+    "static/js/main.388a1ff3.js"
   ]
 }

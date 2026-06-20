@@ -6,6 +6,7 @@ const { isAuthenticated, isSeller, isAdmin } = require("../middleware/auth");
 const Order = require("../model/order");
 const Shop = require("../model/shop");
 const Product = require("../model/product");
+const Event = require("../model/event");
 
 // create new order
 router.post(
@@ -37,6 +38,24 @@ router.post(
           paymentInfo,
         });
         orders.push(order);
+
+        // Update product stock and sold_out when order is created/placed
+        for (const item of items) {
+          const product = await Product.findById(item._id);
+          if (product) {
+            product.stock -= item.qty;
+            product.sold_out += item.qty;
+            await product.save({ validateBeforeSave: false });
+          } else {
+            // Also check Event model just in case it is an event item
+            const event = await Event.findById(item._id);
+            if (event) {
+              event.stock -= item.qty;
+              event.sold_out += item.qty;
+              await event.save({ validateBeforeSave: false });
+            }
+          }
+        }
       }
 
       res.status(201).json({
@@ -100,10 +119,8 @@ router.put(
       if (!order) {
         return next(new ErrorHandler("Order not found with this id", 400));
       }
-      if (req.body.status === "Transferred to delivery partner") {
-        order.cart.forEach(async (o) => {
-          await updateOrder(o._id, o.qty);
-        });
+      if (!req.body.status) {
+        return next(new ErrorHandler("Status is required", 400));
       }
 
       order.status = req.body.status;
@@ -122,19 +139,10 @@ router.put(
         order,
       });
 
-      async function updateOrder(id, qty) {
-        const product = await Product.findById(id);
-
-        product.stock -= qty;
-        product.sold_out += qty;
-
-        await product.save({ validateBeforeSave: false });
-      }
-
       async function updateSellerInfo(amount) {
         const seller = await Shop.findById(req.seller.id);
 
-        seller.availableBalance = amount;
+        seller.availableBalance += amount;
 
         await seller.save();
       }
@@ -153,6 +161,9 @@ router.put(
 
       if (!order) {
         return next(new ErrorHandler("Order not found with this id", 400));
+      }
+      if (!req.body.status) {
+        return next(new ErrorHandler("Status is required", 400));
       }
 
       order.status = req.body.status;
@@ -181,6 +192,9 @@ router.put(
       if (!order) {
         return next(new ErrorHandler("Order not found with this id", 400));
       }
+      if (!req.body.status) {
+        return next(new ErrorHandler("Status is required", 400));
+      }
 
       order.status = req.body.status;
 
@@ -199,11 +213,18 @@ router.put(
 
       async function updateOrder(id, qty) {
         const product = await Product.findById(id);
-
-        product.stock += qty;
-        product.sold_out -= qty;
-
-        await product.save({ validateBeforeSave: false });
+        if (product) {
+          product.stock += qty;
+          product.sold_out -= qty;
+          await product.save({ validateBeforeSave: false });
+        } else {
+          const event = await Event.findById(id);
+          if (event) {
+            event.stock += qty;
+            event.sold_out -= qty;
+            await event.save({ validateBeforeSave: false });
+          }
+        }
       }
     } catch (error) {
       return next(new ErrorHandler(error.message, 500));

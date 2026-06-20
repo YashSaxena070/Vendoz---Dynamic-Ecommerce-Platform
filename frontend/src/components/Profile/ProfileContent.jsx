@@ -9,7 +9,6 @@ import {
 } from "../../redux/actions/user";
 import { AiOutlineArrowRight, AiOutlineCamera, AiOutlineDelete } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
-import styles from "../../styles/styles";
 import { DataGrid } from "@material-ui/data-grid";
 import { Button } from "@material-ui/core";
 import { RxCross1 } from 'react-icons/rx'
@@ -26,7 +25,7 @@ const ProfileContent = ({ active }) => {
     const [email, setEmail] = useState(user && user.email);
     const [phoneNumber, setPhoneNumber] = useState(user && user.phoneNumber);
     const [password, setPassword] = useState("");
-    const [avatar, setAvatar] = useState(null);
+
 
     const dispatch = useDispatch();
 
@@ -40,7 +39,7 @@ const ProfileContent = ({ active }) => {
             toast.success(successMessage);
             dispatch({ type: "clearMessages" });
         }
-    }, [error, successMessage]);
+    }, [error, successMessage, dispatch]);
 
 
     const handleSubmit = (e) => {
@@ -50,9 +49,6 @@ const ProfileContent = ({ active }) => {
 
     // Image update
     const handleImage = async (e) => {
-        const file = e.target.files[0];
-        setAvatar(file);
-
         const formData = new FormData();
 
         formData.append("image", e.target.files[0]);
@@ -79,90 +75,84 @@ const ProfileContent = ({ active }) => {
             {/* Profile */}
             {
                 active === 1 && (
-                    <>
-                        <div className="flex justify-center w-full">
-                            <div className='relative'>
+                    <div className="bg-white rounded-2xl border border-[#EDE8E0] p-6 800px:p-10">
+                        {/* Avatar Section */}
+                        <div className="flex justify-center w-full mb-8">
+                            <div className="avatar-ring">
                                 <img src={`${backend_url}${user?.avatar}`}
-                                    className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
+                                    className="w-[130px] h-[130px]"
                                     alt="profile img" />
-
-                                <div className="w-[30px] h-[30px] bg-[#E3E9EE] rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px]">
+                                <div className="camera-btn">
                                     <input type="file"
                                         id="image"
                                         className="hidden"
                                         onChange={handleImage}
                                     />
-                                    <label htmlFor="image">
-                                        <AiOutlineCamera />
+                                    <label htmlFor="image" className="cursor-pointer flex items-center justify-center w-full h-full">
+                                        <AiOutlineCamera size={16} />
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <br />
-                        <br />
 
-                        <div className='w-full px-5'>
-                            <form onSubmit={handleSubmit} aria-required={true}>
-                                <div className='w-full 800px:flex block pb-3'>
-
-                                    <div className=' w-[100%] 800px:w-[50%]'>
-                                        <label className='block pb-2'>Full Name</label>
-                                        <input type="text"
-                                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                                            required
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className=' w-[100%] 800px:w-[50%]'>
-                                        <label className='block pb-2'>Email Address</label>
-                                        <input type="text"
-                                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                                            required
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                        />
-                                    </div>
+                        {/* Form */}
+                        <form onSubmit={handleSubmit}>
+                            <div className='w-full grid grid-cols-1 800px:grid-cols-2 gap-6 mb-6'>
+                                <div>
+                                    <label className='premium-label'>Full Name</label>
+                                    <input type="text"
+                                        className="premium-input"
+                                        required
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
                                 </div>
-
-                                <div className="w-full 800px:flex block pb-3">
-                                    <div className=" w-[100%] 800px:w-[50%]">
-                                        <label className="block pb-2">Phone Number</label>
-                                        <input
-                                            type="number"
-                                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                                            required
-                                            value={phoneNumber}
-                                            onChange={(e) => setPhoneNumber(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className=" w-[100%] 800px:w-[50%]">
-                                        <label className="block pb-2">Enter your password</label>
-                                        <input
-                                            type="password"
-                                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                                            required
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                        />
-                                    </div>
-
+                                <div>
+                                    <label className='premium-label'>Email Address</label>
+                                    <input type="text"
+                                        className="premium-input"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
                                 </div>
-                                <input
-                                    className={`w-[250px] h-[40px] border border-[#3a24db] text-center text-[#3a24db] rounded-[3px] mt-8 cursor-pointer`}
-                                    required
-                                    value="Update"
-                                    type="submit"
-                                />
-                            </form>
-                        </div>
-                    </>
+                            </div>
+
+                            <div className="w-full grid grid-cols-1 800px:grid-cols-2 gap-6 mb-8">
+                                <div>
+                                    <label className="premium-label">Phone Number</label>
+                                    <input
+                                        type="number"
+                                        className="premium-input"
+                                        required
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="premium-label">Enter your password</label>
+                                    <input
+                                        type="password"
+                                        className="premium-input"
+                                        required
+                                        value={password}
+                                        placeholder="Required to save changes"
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="submit"
+                                className="btn-premium"
+                            >
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
                 )
             }
 
-            {/* Odder  */}
+            {/* Orders */}
             {
                 active === 2 && (
                     <div>
@@ -214,14 +204,10 @@ const AllOrders = () => {
 
     useEffect(() => {
         dispatch(getAllOrdersOfUser(user._id));
-    }, []);
-
-
-
+    }, [dispatch, user._id]);
 
     const columns = [
         { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
-
         {
             field: "status",
             headerName: "Status",
@@ -240,7 +226,6 @@ const AllOrders = () => {
             minWidth: 130,
             flex: 0.7,
         },
-
         {
             field: "total",
             headerName: "Total",
@@ -248,7 +233,6 @@ const AllOrders = () => {
             minWidth: 130,
             flex: 0.8,
         },
-
         {
             field: " ",
             flex: 1,
@@ -284,8 +268,14 @@ const AllOrders = () => {
 
 
     return (
-        <>
-            <div className='pl-8 pt-1'>
+        <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+            <div className="page-container">
+                <div className="page-header">
+                    <h2 className="section-title">My Orders</h2>
+                    <span className="count-badge">{row.length}</span>
+                </div>
+            </div>
+            <div className="data-grid-premium px-4 pb-4">
                 <DataGrid
                     rows={row}
                     columns={columns}
@@ -293,14 +283,12 @@ const AllOrders = () => {
                     disableSelectionOnClick
                     autoHeight
                 />
-
             </div>
-        </>
+        </div>
     )
 }
 
 // Refund page
-
 const AllRefundOrders = () => {
     const { user } = useSelector((state) => state.user);
     const { orders } = useSelector((state) => state.order);
@@ -308,14 +296,12 @@ const AllRefundOrders = () => {
 
     useEffect(() => {
         dispatch(getAllOrdersOfUser(user._id));
-    }, []);
-
+    }, [dispatch, user._id]);
 
     const eligibleOrders = orders && orders.filter((item) => item.status === "Processing refund");
 
     const columns = [
         { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
-
         {
             field: "status",
             headerName: "Status",
@@ -334,7 +320,6 @@ const AllRefundOrders = () => {
             minWidth: 130,
             flex: 0.7,
         },
-
         {
             field: "total",
             headerName: "Total",
@@ -342,7 +327,6 @@ const AllRefundOrders = () => {
             minWidth: 130,
             flex: 0.8,
         },
-
         {
             field: " ",
             flex: 1,
@@ -377,14 +361,22 @@ const AllRefundOrders = () => {
         });
 
     return (
-        <div className="pl-8 pt-1">
-            <DataGrid
-                rows={row}
-                columns={columns}
-                pageSize={10}
-                autoHeight
-                disableSelectionOnClick
-            />
+        <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+            <div className="page-container">
+                <div className="page-header">
+                    <h2 className="section-title">Refund Orders</h2>
+                    <span className="count-badge">{row.length}</span>
+                </div>
+            </div>
+            <div className="data-grid-premium px-4 pb-4">
+                <DataGrid
+                    rows={row}
+                    columns={columns}
+                    pageSize={10}
+                    autoHeight
+                    disableSelectionOnClick
+                />
+            </div>
         </div>
     );
 };
@@ -399,13 +391,10 @@ const TrackOrder = () => {
 
     useEffect(() => {
         dispatch(getAllOrdersOfUser(user._id));
-    }, []);
-
-
+    }, [dispatch, user._id]);
 
     const columns = [
         { field: "id", headerName: "Order ID", minWidth: 150, flex: 0.7 },
-
         {
             field: "status",
             headerName: "Status",
@@ -424,7 +413,6 @@ const TrackOrder = () => {
             minWidth: 130,
             flex: 0.7,
         },
-
         {
             field: "total",
             headerName: "Total",
@@ -432,7 +420,6 @@ const TrackOrder = () => {
             minWidth: 130,
             flex: 0.8,
         },
-
         {
             field: " ",
             flex: 1,
@@ -467,21 +454,28 @@ const TrackOrder = () => {
         });
 
     return (
-        <div className="pl-8 pt-1">
-            <DataGrid
-                rows={row}
-                columns={columns}
-                pageSize={10}
-                disableSelectionOnClick
-                autoHeight
-            />
+        <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+            <div className="page-container">
+                <div className="page-header">
+                    <h2 className="section-title">Track Orders</h2>
+                    <span className="count-badge">{row.length}</span>
+                </div>
+            </div>
+            <div className="data-grid-premium px-4 pb-4">
+                <DataGrid
+                    rows={row}
+                    columns={columns}
+                    pageSize={10}
+                    disableSelectionOnClick
+                    autoHeight
+                />
+            </div>
         </div>
     )
 }
 
 
-// Payment method
-
+// Change Password
 const ChangePassword = () => {
 
     const [oldPassword, setOldPassword] = useState("");
@@ -498,7 +492,7 @@ const ChangePassword = () => {
                 { withCredentials: true }
             )
             .then((res) => {
-                toast.success("Pawword is updated");
+                toast.success("Password updated successfully!");
                 setOldPassword("");
                 setNewPassword("");
                 setConfirmPassword("");
@@ -509,63 +503,65 @@ const ChangePassword = () => {
     };
 
     return (
-        <div className='w-full px-5'>
-            <h1
-                className='text-[25px] text-center font-[600] text[#000000ba] pb-2'
-            >
-                Change Password
-            </h1>
-            <div className='w-full'>
-                <form
-                    aria-required
-                    onSubmit={passwordChangeHandler}
-                    className="flex flex-col items-center"
-                >
-                    <div className=" w-[100%] 800px:w-[50%] mt-5">
-                        <label className='block pb-2'>Enter your Old password</label>
-                        <input type="password"
-                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                            required
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                        />
-                    </div>
-
-                    <div className=" w-[100%] 800px:w-[50%] mt-2">
-                        <label className='block pb-2'>Enter your new Password</label>
-                        <input type="password"
-                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                            required
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                        />
-                    </div>
-
-                    <div className=" w-[100%] 800px:w-[50%] mt-2">
-                        <label className="block pb-2">Enter your confirm password</label>
-                        <input
-                            type="password"
-                            className={`${styles.input} !w-[95%] mb-4 800px:mb-0`}
-                            required
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                        <input
-                            className={`w-[95%] h-[40px] border border-[#3a24db] text-center text-[#3a24db] rounded-[3px] mt-8 cursor-pointer`}
-                            required
-                            value="Update"
-                            type="submit"
-                        />
-                    </div>
-                </form>
-
+        <div className="bg-white rounded-2xl border border-[#EDE8E0] p-6 800px:p-10 max-w-[600px] mx-auto">
+            <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+                <h2 className="section-title !text-[22px]">Change Password</h2>
+                <p className="text-sm text-slate-400 mt-3">
+                    Choose a strong password to protect your account
+                </p>
             </div>
 
+            <form
+                onSubmit={passwordChangeHandler}
+                className="space-y-5"
+            >
+                <div>
+                    <label className='premium-label'>Current Password</label>
+                    <input type="password"
+                        className="premium-input"
+                        required
+                        placeholder="Enter current password"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                    />
+                </div>
 
+                <div>
+                    <label className='premium-label'>New Password</label>
+                    <input type="password"
+                        className="premium-input"
+                        required
+                        placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                </div>
 
+                <div>
+                    <label className="premium-label">Confirm New Password</label>
+                    <input
+                        type="password"
+                        className="premium-input"
+                        required
+                        placeholder="Confirm new password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                </div>
 
+                <button
+                    type="submit"
+                    className="btn-premium w-full mt-4"
+                >
+                    Update Password
+                </button>
+            </form>
         </div>
-
     )
 }
 
@@ -584,15 +580,9 @@ const Address = () => {
 
 
     const addressTypeData = [
-        {
-            name: "Default",
-        },
-        {
-            name: "Home",
-        },
-        {
-            name: "Office",
-        },
+        { name: "Default" },
+        { name: "Home" },
+        { name: "Office" },
     ];
 
     const handleSubmit = async (e) => {
@@ -601,7 +591,6 @@ const Address = () => {
         if (addressType === "" || country === "" || city === "") {
             toast.error("Please fill all the fields!");
         } else {
-            // hear use redex
             dispatch(
                 updatUserAddress(
                     country,
@@ -617,7 +606,7 @@ const Address = () => {
             setCity("");
             setAddress1("");
             setAddress2("");
-            setZipCode(null); // return type is int so default is null
+            setZipCode(null);
             setAddressType("");
         }
     }
@@ -628,209 +617,171 @@ const Address = () => {
     }
 
     return (
-        <div className='w-full px-5'>
+        <div className='w-full'>
+            {/* Add Address Modal */}
+            {open && (
+                <div className="modal-overlay" onClick={() => setOpen(false)}>
+                    <div
+                        className="modal-content w-[90%] 800px:w-[480px] p-0"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-[#EDE8E0]">
+                            <h3 className="text-lg font-bold text-[#1A1A2E]">Add New Address</h3>
+                            <button
+                                className="btn-delete"
+                                onClick={() => setOpen(false)}
+                            >
+                                <RxCross1 size={18} />
+                            </button>
+                        </div>
 
-            {
-                open && (
-                    <div className="fixed w-full h-screen bg-[#0000004b] top-0 left-0 flex items-center justify-center ">
-                        <div className="w-[35%] h-[80vh] bg-white rounded shadow relative overflow-y-scroll">
-                            <div className="w-full flex justify-end p-3">
-                                <RxCross1
-                                    size={30}
-                                    className="cursor-pointer"
-                                    onClick={() => setOpen(false)}
+                        {/* Modal Body */}
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="premium-label">Country</label>
+                                <select
+                                    value={country}
+                                    onChange={(e) => setCountry(e.target.value)}
+                                    className="premium-select"
+                                >
+                                    <option value="">Choose your country</option>
+                                    {Country &&
+                                        Country.getAllCountries().map((item) => (
+                                            <option key={item.isoCode} value={item.isoCode}>
+                                                {item.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="premium-label">City / State</label>
+                                <select
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    className="premium-select"
+                                >
+                                    <option value="">Choose your city</option>
+                                    {State &&
+                                        State.getStatesOfCountry(country).map((item) => (
+                                            <option key={item.isoCode} value={item.isoCode}>
+                                                {item.name}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="premium-label">Address 1</label>
+                                <input
+                                    type="address"
+                                    className="premium-input"
+                                    required
+                                    placeholder="Street address"
+                                    value={address1}
+                                    onChange={(e) => setAddress1(e.target.value)}
                                 />
                             </div>
-                            <h1 className="text-center text-[25px] font-Poppins">
-                                Add New Address
-                            </h1>
-                            <div className='w-full'>
-                                <form aria-required onSubmit={handleSubmit} className="w-full">
-                                    <div className="w-full block p-4">
-                                        <div className="w-full pb-2">
-                                            <label className="block pb-2">Country</label>
-                                            <select
-                                                name=""
-                                                id=""
-                                                value={country}
-                                                onChange={(e) => setCountry(e.target.value)}
-                                                className="w-[95%] border h-[40px] rounded-[5px]"
-                                            >
-                                                <option value=""
-                                                    className='bloc border pb-2'
-                                                >
-                                                    Choose your contry
-                                                </option>
-                                                {
-                                                    Country &&
-                                                    Country.getAllCountries().map((item) => (
-                                                        <option
-                                                            className="block pb-2"
-                                                            key={item.isoCode}
-                                                            value={item.isoCode}
-                                                        >
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </div>
 
-                                        {/* City */}
-                                        <div className="w-full pb-2">
-                                            <label className="block pb-2">Choose your City</label>
-                                            <select
-                                                name=""
-                                                id=""
-                                                value={city}
-                                                onChange={(e) => setCity(e.target.value)}
-                                                className="w-[95%] border h-[40px] rounded-[5px]"
-                                            >
-                                                <option value="" className="block border pb-2">
-                                                    choose your city
-                                                </option>
-                                                {State &&
-                                                    State.getStatesOfCountry(country).map((item) => (
-                                                        <option
-                                                            className="block pb-2"
-                                                            key={item.isoCode}
-                                                            value={item.isoCode}
-                                                        >
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </div>
-
-                                        {/* Address 1 */}
-                                        <div className="w-full pb-2">
-                                            <label className="block pb-2">Address 1</label>
-                                            <input
-                                                type="address"
-                                                className={`${styles.input}`}
-                                                required
-                                                value={address1}
-                                                onChange={(e) => setAddress1(e.target.value)}
-                                            />
-                                        </div>
-                                        {/* Address 2 */}
-                                        <div className="w-full pb-2">
-                                            <label className="block pb-2">Address 2</label>
-                                            <input
-                                                type="address"
-                                                className={`${styles.input}`}
-                                                required
-                                                value={address2}
-                                                onChange={(e) => setAddress2(e.target.value)}
-                                            />
-                                        </div>
-
-                                        <div className="w-full pb-2">
-                                            <label className="block pb-2">Zip Code</label>
-                                            <input
-                                                type="number"
-                                                className={`${styles.input}`}
-                                                required
-                                                value={zipCode}
-                                                onChange={(e) => setZipCode(e.target.value)}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className='block pb-2'>Address Type</label>
-                                            <select name="" id=""
-                                                value={addressType}
-                                                onChange={(e) => setAddressType(e.target.value)}
-                                                className='w-[95%] border h-[40px]  rounded-[5px]'
-                                            >
-                                                <option value=""
-                                                    className='block border pb-2'
-                                                >
-                                                    Choose Yoour Address Type
-                                                </option>
-                                                {
-                                                    addressTypeData &&
-                                                    addressTypeData.map((item) => (
-                                                        <option
-                                                            className='block pb-2'
-                                                            key={item.name}
-                                                            value={item.name}
-                                                        >
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                        </div>
-
-                                        <div className=" w-full pb-2">
-                                            <input
-                                                type="submit"
-                                                className={`${styles.input} mt-5 cursor-pointer`}
-                                                required
-                                                readOnly
-                                            />
-                                        </div>
-
-                                    </div>
-                                </form>
-
+                            <div>
+                                <label className="premium-label">Address 2</label>
+                                <input
+                                    type="address"
+                                    className="premium-input"
+                                    required
+                                    placeholder="Apartment, suite, etc."
+                                    value={address2}
+                                    onChange={(e) => setAddress2(e.target.value)}
+                                />
                             </div>
-                        </div>
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="premium-label">Zip Code</label>
+                                    <input
+                                        type="number"
+                                        className="premium-input"
+                                        required
+                                        placeholder="000000"
+                                        value={zipCode}
+                                        onChange={(e) => setZipCode(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className='premium-label'>Address Type</label>
+                                    <select
+                                        value={addressType}
+                                        onChange={(e) => setAddressType(e.target.value)}
+                                        className="premium-select"
+                                    >
+                                        <option value="">Choose type</option>
+                                        {addressTypeData.map((item) => (
+                                            <option key={item.name} value={item.name}>
+                                                {item.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="btn-premium w-full mt-2">
+                                Save Address
+                            </button>
+                        </form>
                     </div>
-                )
-
-            }
-
-            <div className='flex w-full items-center justify-between' >
-                <h1
-                    className='text-[25px] font-[600] text[#000000ba] pb-2'
-                >
-                    My Address
-                </h1>
-                <div className={`${styles.button} rounded-md`}
-                    onClick={() => setOpen(true)}
-                >
-                    <span className='text-[#fff]'>Add New</span>
-
                 </div>
-            </div>
-            <br />
+            )}
 
-            {user &&
-                user.addresses.map((item, index) => (
-                    <div
-                        className="w-full bg-white h-min 800px:h-[70px] rounded-[4px] flex items-center px-3 shadow justify-between pr-10 mb-5"
-                        key={index}
-                    >
-                        <div className="flex items-center">
-                            <h5 className="pl-5 font-[600]">{item.addressType}</h5>
-                        </div>
-                        <div className="pl-8 flex items-center">
-                            <h6 className="text-[12px] 800px:text-[unset]">
-                                {item.address1} {item.address2}
-                            </h6>
-                        </div>
-                        <div className="pl-8 flex items-center">
-                            <h6 className="text-[12px] 800px:text-[unset]">
-                                {user && user.phoneNumber}
-                            </h6>
-                        </div>
-                        <div className="min-w-[10%] flex items-center justify-between pl-8">
-                            <AiOutlineDelete
-                                size={25}
-                                className="cursor-pointer"
+            {/* Header */}
+            <div className="bg-white rounded-2xl border border-[#EDE8E0] p-6">
+                <div className='flex w-full items-center justify-between mb-6'>
+                    <h2 className="section-title">My Addresses</h2>
+                    <button className="btn-premium" onClick={() => setOpen(true)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add New
+                    </button>
+                </div>
+
+                {/* Address List */}
+                {user &&
+                    user.addresses.map((item, index) => (
+                        <div className="address-card" key={index}>
+                            <div className="flex-shrink-0">
+                                <span className="address-type-badge">{item.addressType}</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-[#1A1A2E] truncate">
+                                    {item.address1} {item.address2}
+                                </p>
+                                <p className="text-xs text-slate-400 mt-1">
+                                    {user && user.phoneNumber}
+                                </p>
+                            </div>
+                            <button
+                                className="btn-delete flex-shrink-0"
                                 onClick={() => handleDelete(item)}
-                            />
+                            >
+                                <AiOutlineDelete size={18} />
+                            </button>
                         </div>
-                    </div>
-                ))}
+                    ))}
 
-            {
-                user && user.addresses.length === 0 && (
-                    <h5 className="text-center pt-8 text-[18px]">
-                        You not have any saved address!
-                    </h5>
+                {user && user.addresses.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-50 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <p className="text-slate-400 font-medium">No saved addresses yet</p>
+                        <p className="text-sm text-slate-300 mt-1">Add your first address to get started</p>
+                    </div>
                 )}
+            </div>
         </div>
     )
 

@@ -1,11 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { server } from "../../server";
-import { Link } from "react-router-dom";
 import { DataGrid } from "@material-ui/data-grid";
 import { BsPencil } from "react-icons/bs";
 import { RxCross1 } from "react-icons/rx";
-import styles from "../../styles/styles";
 import { toast } from "react-toastify";
 
 const AllWithdraw = () => {
@@ -74,7 +72,11 @@ const AllWithdraw = () => {
             className={`${
               params.row.status !== "Processing" ? "hidden" : ""
             } mr-5 cursor-pointer`}
-            onClick={() => setOpen(true) || setWithdrawData(params.row)}
+            onClick={() => {
+              setOpen(true);
+              setWithdrawData(params.row);
+              setWithdrawStatus(params.row.status);
+            }}
           />
         );
       },
@@ -87,6 +89,7 @@ const AllWithdraw = () => {
         `${server}/withdraw/update-withdraw-request/${withdrawData.id}`,
         {
           sellerId: withdrawData.shopId,
+          status: withdrawStatus,
         },
         { withCredentials: true }
       )
@@ -111,42 +114,54 @@ const AllWithdraw = () => {
       });
     });
   return (
-    <div className="w-full flex items-center pt-5 justify-center">
-      <div className="w-[95%] bg-white">
-        <DataGrid
-          rows={row}
-          columns={columns}
-          pageSize={10}
-          disableSelectionOnClick
-          autoHeight
-        />
+    <div className="w-full page-container">
+      <div className="page-header">
+        <div className="flex items-center">
+          <h2 className="section-title">Withdraw Requests</h2>
+          <span className="count-badge">{row.length}</span>
+        </div>
+      </div>
+      <div className="bg-white rounded-2xl border border-[#EDE8E0] overflow-hidden">
+        <div className="data-grid-premium">
+          <DataGrid
+            rows={row}
+            columns={columns}
+            pageSize={10}
+            disableSelectionOnClick
+            autoHeight
+          />
+        </div>
       </div>
       {open && (
-        <div className="w-full fixed h-screen top-0 left-0 bg-[#00000031] z-[9999] flex items-center justify-center">
-          <div className="w-[50%] min-h-[40vh] bg-white rounded shadow p-4">
-            <div className="flex justify-end w-full">
-              <RxCross1 size={25} onClick={() => setOpen(false)} />
+        <div className="modal-overlay" onClick={() => setOpen(false)}>
+          <div className="modal-content w-[90%] 800px:w-[420px] p-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-[#EDE8E0]">
+              <h3 className="text-lg font-bold text-[#1A1A2E]">Update Status</h3>
+              <button className="btn-delete" onClick={() => setOpen(false)}>
+                <RxCross1 size={18} />
+              </button>
             </div>
-            <h1 className="text-[25px] text-center font-Poppins">
-              Update Withdraw status
-            </h1>
-            <br />
-            <select
-              name=""
-              id=""
-              onChange={(e) => setWithdrawStatus(e.target.value)}
-              className="w-[200px] h-[35px] border rounded"
-            >
-              <option value={withdrawStatus}>{withdrawData.status}</option>
-              <option value={withdrawStatus}>Succeed</option>
-            </select>
-            <button
-              type="submit"
-              className={`block ${styles.button} text-white !h-[42px] mt-4 text-[18px]`}
-              onClick={handleSubmit}
-            >
-              Update
-            </button>
+            <div className="p-6 space-y-5">
+              <div>
+                <label className="premium-label">Withdraw Status</label>
+                <select
+                  onChange={(e) => setWithdrawStatus(e.target.value)}
+                  className="premium-select"
+                  value={withdrawStatus}
+                >
+                  <option value="Processing">Processing</option>
+                  <option value="Succeed">Succeed</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                className="btn-premium w-full"
+                onClick={handleSubmit}
+              >
+                Update
+              </button>
+            </div>
           </div>
         </div>
       )}
