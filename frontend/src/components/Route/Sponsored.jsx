@@ -1,6 +1,10 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import styles from "../../styles/styles"
 import lgLogo from "../../lg-logo.svg"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const BRANDS = [
   {
@@ -22,12 +26,48 @@ const BRANDS = [
 ]
 
 const Sponsored = () => {
+  const sectionRef = useRef(null)
+  const titleRef = useRef(null)
+  const brandsRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // ── Title fade in ──
+      if (titleRef.current) {
+        gsap.from(titleRef.current, {
+          y: 20, opacity: 0, duration: 0.6,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: titleRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Brand logos stagger ──
+      if (brandsRef.current) {
+        gsap.from(brandsRef.current.children, {
+          scale: 0.7, opacity: 0, duration: 0.5, stagger: 0.12,
+          ease: "back.out(1.4)",
+          scrollTrigger: {
+            trigger: brandsRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section className={`${styles.section} hidden sm:block py-12 mb-8`}>
-      <p className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">
+    <section ref={sectionRef} className={`${styles.section} hidden sm:block py-12 mb-8`}>
+      <p ref={titleRef} className="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-6">
         Trusted brands on Vendoz
       </p>
-      <div className="flex items-center justify-center gap-10 flex-wrap">
+      <div ref={brandsRef} className="flex items-center justify-center gap-10 flex-wrap">
         {BRANDS.map((brand) => (
           <div
             key={brand.name}

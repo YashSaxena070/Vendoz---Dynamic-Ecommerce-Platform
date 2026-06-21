@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import logo from "../../vendoz-logo-white.svg"
 import {
   AiFillFacebook,
@@ -12,6 +12,10 @@ import {
   footerProductLinks,
   footerSupportLinks,
 } from "../../static/data"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const SOCIAL = [
   { Icon: AiFillFacebook, href: "#", label: "Facebook" },
@@ -21,12 +25,62 @@ const SOCIAL = [
 ]
 
 const Footer = () => {
+  const footerRef = useRef(null)
+  const newsletterRef = useRef(null)
+  const columnsRef = useRef(null)
+  const socialRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // ── Newsletter slide-up ──
+      if (newsletterRef.current) {
+        gsap.from(newsletterRef.current.children, {
+          y: 40, opacity: 0, duration: 0.7, stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: newsletterRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Footer columns stagger ──
+      if (columnsRef.current) {
+        gsap.from(columnsRef.current.children, {
+          y: 30, opacity: 0, duration: 0.6, stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: columnsRef.current,
+            start: "top 90%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Social icons pop-in ──
+      if (socialRef.current) {
+        gsap.from(socialRef.current.children, {
+          scale: 0, opacity: 0, duration: 0.4, stagger: 0.08,
+          ease: "back.out(2)",
+          scrollTrigger: {
+            trigger: socialRef.current,
+            start: "top 95%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+    }, footerRef)
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <footer className="bg-[#0F0F1E] text-white">
+    <footer ref={footerRef} className="bg-[#0F0F1E] text-white">
 
       {/* ── Newsletter band ── */}
       <div className="border-b border-white/10">
-        <div className="w-11/12 mx-auto max-w-7xl py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div ref={newsletterRef} className="w-11/12 mx-auto max-w-7xl py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <p className="text-amber-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1">
               Stay in the loop
@@ -52,14 +106,14 @@ const Footer = () => {
       </div>
 
       {/* ── Main links ── */}
-      <div className="w-11/12 mx-auto max-w-7xl py-14 grid grid-cols-2 sm:grid-cols-4 gap-8">
+      <div ref={columnsRef} className="w-11/12 mx-auto max-w-7xl py-14 grid grid-cols-2 sm:grid-cols-4 gap-8">
         {/* Brand col */}
         <div className="col-span-2 sm:col-span-1">
           <img src={logo} alt="Vendoz" className="h-8 mb-5" />
           <p className="text-[13px] text-white/50 leading-relaxed max-w-[200px]">
             Marketplace for unique products from independent sellers worldwide.
           </p>
-          <div className="flex items-center gap-3 mt-5">
+          <div ref={socialRef} className="flex items-center gap-3 mt-5">
             {SOCIAL.map(({ Icon, href, label }) => (
               <a
                 key={label}

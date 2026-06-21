@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.90deeb59.css",
-    "main.js": "/static/js/main.2abe0d02.js",
+    "main.css": "/static/css/main.436bc95e.css",
+    "main.js": "/static/js/main.ac6f24f3.js",
     "static/js/27.07bc2567.chunk.js": "/static/js/27.07bc2567.chunk.js",
     "static/media/lg-logo.svg": "/static/media/lg-logo.fc7ec1b3b9fd1ede732586c87a8770e2.svg",
     "static/media/vendoz-logo-white.svg": "/static/media/vendoz-logo-white.ef81dce3367d865d19c98ca559586222.svg",
@@ -12,7 +12,7 @@
     "static/media/shoes-category.svg": "/static/media/shoes-category.b4c3f27a008ce887caee7e7670ff0122.svg"
   },
   "entrypoints": [
-    "static/css/main.90deeb59.css",
-    "static/js/main.2abe0d02.js"
+    "static/css/main.436bc95e.css",
+    "static/js/main.ac6f24f3.js"
   ]
 }

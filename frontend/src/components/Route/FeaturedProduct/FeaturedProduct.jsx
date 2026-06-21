@@ -1,31 +1,74 @@
-import React from "react"
+import React, { useEffect, useRef } from "react"
 import { useSelector } from "react-redux"
 import { Link } from "react-router-dom"
 import styles from "../../../styles/styles"
 import ProductCard from "../ProductCard/ProductCard"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const FeaturedProduct = () => {
   const { allProducts } = useSelector((state) => state.products)
-
-  if (!allProducts || allProducts.length === 0) return null
+  const sectionRef = useRef(null)
+  const headerRef = useRef(null)
+  const gridRef = useRef(null)
 
   // Filter to show only one product from each brand (shop)
-  const featuredProducts = [];
-  const seenShops = new Set();
+  const featuredProducts = []
+  const seenShops = new Set()
 
-  for (const product of allProducts) {
-    const shopId = product.shopId || (product.shop && product.shop._id);
-    if (shopId && !seenShops.has(shopId)) {
-      seenShops.add(shopId);
-      featuredProducts.push(product);
+  if (allProducts) {
+    for (const product of allProducts) {
+      const shopId = product.shopId || (product.shop && product.shop._id)
+      if (shopId && !seenShops.has(shopId)) {
+        seenShops.add(shopId)
+        featuredProducts.push(product)
+      }
     }
   }
 
+  useEffect(() => {
+    if (!featuredProducts || featuredProducts.length === 0) return
+
+    const ctx = gsap.context(() => {
+      // ── Section header reveal ──
+      if (headerRef.current) {
+        gsap.from(headerRef.current.children, {
+          y: 30, opacity: 0, duration: 0.6, stagger: 0.12,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: headerRef.current,
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Product cards batch stagger ──
+      if (gridRef.current) {
+        gsap.from(gridRef.current.children, {
+          y: 50, opacity: 0, duration: 0.6, stagger: 0.08,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [featuredProducts.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!allProducts || allProducts.length === 0) return null
+
   return (
-    <section className="bg-white py-14">
+    <section ref={sectionRef} className="bg-white py-14">
       <div className={`${styles.section}`}>
         {/* Header */}
-        <div className="flex items-end justify-between mb-8">
+        <div ref={headerRef} className="flex items-end justify-between mb-8">
           <div>
             <p className="text-amber-500 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">
               Handpicked for you
@@ -43,7 +86,7 @@ const FeaturedProduct = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div ref={gridRef} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {featuredProducts.map((item, index) => (
             <ProductCard data={item} key={index} />
           ))}

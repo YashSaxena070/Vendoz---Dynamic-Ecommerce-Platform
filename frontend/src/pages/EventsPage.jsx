@@ -1,13 +1,58 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import EventCard from "../components/Events/EventCard";
 import Header from "../components/Layout/Header";
 import Loader from "../components/Layout/Loader";
 import Footer from "../components/Layout/Footer";
 import styles from "../styles/styles";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const EventsPage = () => {
   const { allEvents, isLoading } = useSelector((state) => state.events);
+  const bannerRef = useRef(null);
+  const bannerTextRef = useRef(null);
+  const cardsRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // ── Banner image zoom + fade ──
+      if (bannerRef.current) {
+        const img = bannerRef.current.querySelector("img");
+        if (img) {
+          gsap.from(img, {
+            scale: 1.15, duration: 1.4, ease: "power2.out",
+          });
+        }
+      }
+
+      // ── Banner text stagger ──
+      if (bannerTextRef.current) {
+        gsap.from(bannerTextRef.current.children, {
+          y: 40, opacity: 0, duration: 0.7, stagger: 0.15,
+          ease: "power3.out", delay: 0.3,
+        });
+      }
+
+      // ── Event cards stagger on scroll ──
+      if (cardsRef.current && cardsRef.current.children.length > 0) {
+        gsap.from(cardsRef.current.children, {
+          y: 50, opacity: 0, duration: 0.6, stagger: 0.12,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: cardsRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        });
+      }
+    });
+
+    return () => ctx.revert();
+  }, [allEvents]);
+
   return (
     <>
       {isLoading ? (
@@ -17,7 +62,7 @@ const EventsPage = () => {
           <Header activeHeading={4} />
 
           {/* Celebration Banner */}
-          <div className="relative w-full h-[320px] overflow-hidden mb-10 shadow-md">
+          <div ref={bannerRef} className="relative w-full h-[320px] overflow-hidden mb-10 shadow-md">
             {/* Background Image */}
             <img 
               src="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1600" 
@@ -25,7 +70,7 @@ const EventsPage = () => {
               className="w-full h-full object-cover filter brightness-[0.45] contrast-[1.15] scale-[1.02]"
             />
             {/* Overlay Text */}
-            <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
+            <div ref={bannerTextRef} className="absolute inset-0 flex flex-col justify-center items-center text-center p-6">
               <span className="text-[12px] font-extrabold text-amber-400 uppercase tracking-[0.3em] mb-3 bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-400/20 backdrop-blur-sm animate-pulse">
                 Special Limited Time Event
               </span>
@@ -40,7 +85,7 @@ const EventsPage = () => {
 
           <div className={`${styles.section} flex-1`}>
             {allEvents && allEvents.length !== 0 ? (
-              <div className="space-y-8 mb-16">
+              <div ref={cardsRef} className="space-y-8 mb-16">
                 {allEvents.map((event) => (
                   <EventCard key={event._id} active={true} data={event} />
                 ))}

@@ -1,17 +1,70 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useNavigate } from "react-router-dom"
 import { brandingData, categoriesData } from "../../../static/data"
 import styles from '../../../styles/styles'
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
 
 const Categories = () => {
   const navigate = useNavigate()
+  const sectionRef = useRef(null)
+  const trustRef = useRef(null)
+  const headingRef = useRef(null)
+  const pillsRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // ── Trust bar cards stagger ──
+      if (trustRef.current) {
+        gsap.from(trustRef.current.children, {
+          y: 30, opacity: 0, duration: 0.6, stagger: 0.1,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: trustRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Section heading slide-in ──
+      if (headingRef.current) {
+        gsap.from(headingRef.current, {
+          x: -40, opacity: 0, duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: headingRef.current,
+            start: "top 88%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+
+      // ── Category pills pop-in ──
+      if (pillsRef.current) {
+        gsap.from(pillsRef.current.children, {
+          scale: 0.8, opacity: 0, duration: 0.5, stagger: 0.06,
+          ease: "back.out(1.4)",
+          scrollTrigger: {
+            trigger: pillsRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+          },
+        })
+      }
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <div className="bg-[#F9F7F4] pt-14 pb-4">
+    <div ref={sectionRef} className="bg-[#F9F7F4] pt-14 pb-4">
 
       {/* ── Trust bar ── */}
       <div className={`${styles.section} hidden sm:block mb-12`}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div ref={trustRef} className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {brandingData && brandingData.map((item, index) => (
             <div
               key={index}
@@ -29,14 +82,14 @@ const Categories = () => {
 
       {/* ── Section header ── */}
       <div className={`${styles.section} mb-7`}>
-        <h2 className="section-heading text-[22px] font-extrabold text-[#1A1A2E] tracking-tight">
+        <h2 ref={headingRef} className="section-heading text-[22px] font-extrabold text-[#1A1A2E] tracking-tight">
           Browse Categories
         </h2>
       </div>
 
       {/* ── Category pills ── */}
       <div className={`${styles.section} mb-14`} id="categories">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div ref={pillsRef} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
           {categoriesData && categoriesData.map((cat) => (
             <button
               key={cat.id}
