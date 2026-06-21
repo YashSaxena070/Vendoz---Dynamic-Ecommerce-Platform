@@ -18,7 +18,8 @@ exports.isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("User not found", 404));
   }
 
-  if (req.user.email === "yashsaxena7668@gmail.com" && req.user.role !== "Admin") {
+  EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
+  if (req.user.email == [EMAIL_ADDRESS] && req.user.role !== "Admin") {
     req.user.role = "Admin";
     await req.user.save();
   }

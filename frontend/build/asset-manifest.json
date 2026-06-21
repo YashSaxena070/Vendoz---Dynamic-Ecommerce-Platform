@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.79a9d034.css",
-    "main.js": "/static/js/main.388a1ff3.js",
+    "main.js": "/static/js/main.203dc18e.js",
     "static/js/27.07bc2567.chunk.js": "/static/js/27.07bc2567.chunk.js",
     "static/media/lg-logo.svg": "/static/media/lg-logo.fc7ec1b3b9fd1ede732586c87a8770e2.svg",
     "static/media/vendoz-logo-white.svg": "/static/media/vendoz-logo-white.ef81dce3367d865d19c98ca559586222.svg",
@@ -13,6 +13,6 @@
   },
   "entrypoints": [
     "static/css/main.79a9d034.css",
-    "static/js/main.388a1ff3.js"
+    "static/js/main.203dc18e.js"
   ]
 }
