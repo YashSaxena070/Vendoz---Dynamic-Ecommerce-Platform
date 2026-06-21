@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineArrowRight, AiOutlineSend } from "react-icons/ai";
 import { TfiGallery } from "react-icons/tfi";
 import styles from "../styles/styles";
-const socketId = socketIO(import.meta.env.REACT_APP_SOCKET_URL, {
+const socketId = socketIO("https://vendoz-socket.onrender.com", {
   transports: ["websocket"],
 });
 
