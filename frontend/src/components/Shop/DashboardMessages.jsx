@@ -9,7 +9,7 @@ import styles from "../../styles/styles";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
-const socketId = socketIO(import.meta.env.VITE_SOCKET_URL, {
+const socketId = socketIO(import.meta.env.REACT_APP_SOCKET_URL, {
   transports: ["websocket"],
 });
 
